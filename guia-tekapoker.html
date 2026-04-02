@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Completa de TekaPoker</title>
+  <style>
+    /* ── Fuentes ── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #16a34a;
+      --green-l: #dcfce7;
+      --red:     #dc2626;
+      --red-l:   #fee2e2;
+      --gold:    #d97706;
+      --gold-l:  #fef3c7;
+      --blue-l:  #eff6ff;
+      --blue:    #1d4ed8;
+      --gray:    #374151;
+      --gray-l:  #f9fafb;
+      --border:  #e5e7eb;
+      --text:    #111827;
+      --muted:   #6b7280;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.7;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      text-align: center;
+      padding: 60px 20px 56px;
+      border-bottom: 3px solid var(--green);
+      margin-bottom: 56px;
+    }
+
+    .cover-suits {
+      font-size: 2rem;
+      letter-spacing: .6rem;
+      color: var(--green);
+      margin-bottom: 16px;
+    }
+
+    .cover-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+
+    .cover-subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .cover-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-l);
+      color: var(--green);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+      margin: 4px;
+    }
+
+    /* ── Table of contents ── */
+    .toc {
+      background: var(--gray-l);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 56px;
+    }
+
+    .toc-title {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 24px;
+    }
+
+    .toc li {
+      counter-increment: toc;
+      font-size: .88rem;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .toc li::before {
+      content: counter(toc);
+      min-width: 20px;
+      height: 20px;
+      background: var(--green);
+      color: #fff;
+      border-radius: 50%;
+      font-size: .65rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .toc a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .toc a:hover { color: var(--green); text-decoration: underline; }
+
+    /* ── Headings ── */
+    h1.section {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--text);
+      margin: 56px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--green);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h1.section .num {
+      background: var(--green);
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: .95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 10px;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray);
+      margin: 20px 0 8px;
+    }
+
+    p { margin-bottom: 12px; }
+
+    /* ── Code blocks ── */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+      font-size: .82rem;
+      line-height: 1.7;
+      font-family: 'JetBrains Mono', monospace;
+      border-left: 3px solid var(--green);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82em;
+      background: #f0fdf4;
+      color: #166534;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #bbf7d0;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+
+    /* Syntax highlighting hints inside pre */
+    .cm  { color: #6c7086; } /* comment */
+    .kw  { color: #cba6f7; } /* keyword */
+    .fn  { color: #89b4fa; } /* function */
+    .st  { color: #a6e3a1; } /* string */
+    .nm  { color: #fab387; } /* number */
+    .op  { color: #89dceb; } /* operator / builtin */
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0 20px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 700; font-size: .88rem; margin-bottom: 4px; }
+    .callout-text  { font-size: .88rem; }
+
+    .callout--green { background: var(--green-l); border: 1px solid #86efac; }
+    .callout--green .callout-title { color: var(--green); }
+
+    .callout--blue  { background: var(--blue-l);  border: 1px solid #bfdbfe; }
+    .callout--blue  .callout-title { color: var(--blue); }
+
+    .callout--gold  { background: var(--gold-l);  border: 1px solid #fcd34d; }
+    .callout--gold  .callout-title { color: var(--gold); }
+
+    .callout--red   { background: var(--red-l);   border: 1px solid #fca5a5; }
+    .callout--red   .callout-title { color: var(--red); }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      font-size: .88rem;
+    }
+
+    thead tr { background: var(--green); color: #fff; }
+    thead th { padding: 10px 14px; text-align: left; font-weight: 600; }
+
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:nth-child(even) { background: var(--gray-l); }
+    tbody td { padding: 9px 14px; vertical-align: top; }
+
+    /* ── Flow diagram ── */
+    .flow {
+      background: #0f172a;
+      color: #94a3b8;
+      border-radius: 10px;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      line-height: 1.9;
+      margin: 16px 0 20px;
+      overflow-x: auto;
+    }
+
+    .flow .col-header { color: #38bdf8; font-weight: 600; }
+    .flow .arrow      { color: #4ade80; }
+    .flow .note       { color: #fbbf24; }
+
+    /* ── Step list ── */
+    .steps {
+      list-style: none;
+      margin: 12px 0 20px;
+      counter-reset: step;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      background: var(--green);
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: .78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Calculation trace table ── */
+    .calc-table thead tr { background: #1e3a5f; }
+
+    /* ── Inline file path ── */
+    .filepath {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid #cbd5e1;
+      white-space: nowrap;
+    }
+
+    /* ── Section divider ── */
+    .divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    /* ── Summary card ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 12px 0 20px;
+    }
+
+    .summary-item {
+      background: var(--gray-l);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .summary-item .label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+    .summary-item .value { font-weight: 600; font-size: .95rem; color: var(--text); }
+
+    /* ── Print styles ── */
+    @media print {
+      body { padding: 0; max-width: 100%; font-size: 11pt; }
+      pre  { font-size: 8pt; break-inside: avoid; }
+      h1.section { break-before: page; }
+      .cover { break-after: page; }
+      .toc { break-after: page; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ PORTADA ══════ -->
+<div class="cover">
+  <div class="cover-suits">♠ ♥ ♦ ♣</div>
+  <div class="cover-title">Guía Completa de TekaPoker</div>
+  <div class="cover-subtitle">Todo el proyecto explicado paso a paso, en español sencillo</div>
+  <div style="margin-bottom:20px;">
+    <span class="cover-badge">🐍 Python + FastAPI</span>
+    <span class="cover-badge">⚛️ React + Vite</span>
+    <span class="cover-badge">💾 localStorage</span>
+    <span class="cover-badge">📱 Mobile-first</span>
+  </div>
+  <div class="cover-meta">
+    <span>30 de marzo de 2026</span>
+    <span>·</span>
+    <span>26 archivos · 2 servicios</span>
+    <span>·</span>
+    <span>5 pantallas</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ ÍNDICE ════════ -->
+<div class="toc">
+  <div class="toc-title">Índice de contenidos</div>
+  <ol>
+    <li><a href="#s1">¿Qué es TekaPoker y cómo está organizado?</a></li>
+    <li><a href="#s2">Los archivos de configuración</a></li>
+    <li><a href="#s3">El Backend — Python con FastAPI</a></li>
+    <li><a href="#s4">La lógica de cálculo de pagos</a></li>
+    <li><a href="#s5">El Frontend — React con Vite</a></li>
+    <li><a href="#s6">Los servicios: comunicación y almacenamiento</a></li>
+    <li><a href="#s7">Los componentes: piezas reutilizables</a></li>
+    <li><a href="#s8">Las páginas: las pantallas de la app</a></li>
+    <li><a href="#s9">Comunicación frontend ↔ backend</a></li>
+    <li><a href="#s10">Cómo arrancar el proyecto</a></li>
+    <li><a href="#s11">Ejemplo completo: una partida de principio a fin</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════ 1 ═════════════ -->
+<h1 class="section" id="s1"><span class="num">1</span>¿Qué es TekaPoker y cómo está organizado?</h1>
+
+<p>TekaPoker es una aplicación web que resuelve un problema muy concreto: <strong>al terminar una partida de póker, ¿quién le debe dinero a quién, y cuánto?</strong></p>
+<p>En lugar de hacer cuentas a mano, abres TekaPoker, introduces los puntos finales de cada jugador y el programa te dice exactamente qué transferencias hay que hacer para que todo quede saldado.</p>
+
+<h2>La arquitectura: dos partes que trabajan juntas</h2>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">🍽️</span>
+  <div class="callout-body">
+    <div class="callout-title">Analogía del restaurante</div>
+    <div class="callout-text">El <strong>frontend</strong> es el salón: lo que ve el cliente (botones, pantallas, colores). El <strong>backend</strong> es la cocina: donde ocurren los cálculos reales. El cliente no entra a la cocina, pero sí recibe el resultado de lo que se prepara allí.</div>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Parte</th><th>Tecnología</th><th>¿Qué hace?</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Backend</strong></td><td>Python + FastAPI</td><td>Recibe los datos de la partida, hace los cálculos matemáticos y devuelve los resultados</td></tr>
+    <tr><td><strong>Frontend</strong></td><td>React + Vite</td><td>Muestra la interfaz al usuario: formularios, resultados, historial, ranking</td></tr>
+  </tbody>
+</table>
+
+<h2>Estructura completa de archivos</h2>
+
+<pre><code>tekapoker/
+├── .gitignore                    ← Archivos que Git no debe subir
+├── backend/
+│   ├── main.py                   ← Punto de entrada del servidor
+│   ├── requirements.txt          ← Librerías Python necesarias
+│   ├── .env.example              ← Plantilla de configuración
+│   └── logic/
+│       ├── __init__.py           ← Marca la carpeta como "paquete"
+│       └── calculator.py         ← La lógica matemática de pagos
+└── frontend/
+    ├── package.json              ← Librerías JavaScript necesarias
+    ├── vite.config.js            ← Configuración del servidor de desarrollo
+    ├── index.html                ← El único HTML de la app
+    ├── .env.example              ← Plantilla de configuración
+    └── src/
+        ├── main.jsx              ← Punto de entrada de React
+        ├── App.jsx               ← Enrutador principal (mapeo URL → pantalla)
+        ├── styles/
+        │   └── global.css        ← Todo el diseño visual
+        ├── services/
+        │   ├── api.js            ← Llamadas al backend (fetch)
+        │   └── storage.js        ← Guardado en localStorage
+        ├── components/
+        │   ├── Navbar.jsx        ← Barra de navegación inferior
+        │   ├── PlayerInput.jsx   ← Fila de jugador en el formulario
+        │   ├── BalanceCard.jsx   ← Tarjeta de resultado de un jugador
+        │   ├── TransactionCard.jsx ← Tarjeta de pago (quién paga a quién)
+        │   ├── ConfirmDialog.jsx ← Modal de confirmación (borrar partida)
+        │   └── LoadingSpinner.jsx ← Círculo giratorio de carga
+        └── pages/
+            ├── Home.jsx          ← Pantalla de inicio
+            ├── NewGame.jsx       ← Formulario de nueva partida
+            ├── Results.jsx       ← Resultados y pagos
+            ├── History.jsx       ← Historial de partidas guardadas
+            └── Ranking.jsx       ← Clasificación acumulada</code></pre>
+
+
+<!-- ═══════════════════════════════════════ 2 ═════════════ -->
+<h1 class="section" id="s2"><span class="num">2</span>Los archivos de configuración</h1>
+
+<h2><span class="filepath">.gitignore</span> — Qué no subir a GitHub</h2>
+
+<p><strong>Git</strong> es un programa que guarda el historial de cambios de tu código (como un "Ctrl+Z" infinito). Cuando subes el proyecto a GitHub, Git sube todos los archivos que encuentra, a menos que los excluyas en <code>.gitignore</code>.</p>
+
+<pre><code>node_modules/   <span class="cm"># Carpeta enorme con librerías (puede pesar cientos de MB)</span>
+dist/           <span class="cm"># La versión compilada del frontend (se genera automáticamente)</span>
+.env            <span class="cm"># ¡IMPORTANTE! Contiene URLs y claves privadas, nunca debe subirse</span>
+__pycache__/    <span class="cm"># Archivos temporales que Python crea al ejecutarse</span>
+*.log           <span class="cm"># Registros de errores (archivos de texto con información técnica)</span></code></pre>
+
+<div class="callout callout--red">
+  <span class="callout-icon">⚠️</span>
+  <div class="callout-body">
+    <div class="callout-title">El archivo .env nunca debe subirse a GitHub</div>
+    <div class="callout-text">El .env puede contener contraseñas, claves de API o URLs internas. Si lo subes accidentalmente a un repositorio público, cualquiera puede leerlo. Por eso está en el .gitignore.</div>
+  </div>
+</div>
+
+<h2><span class="filepath">.env.example</span> — La plantilla de configuración</h2>
+
+<p>Los archivos <code>.env</code> (de <em>environment</em>, que significa "entorno") son hojas de configuración que cambian según dónde se ejecute la app: en tu ordenador local o en un servidor en internet.</p>
+
+<p><strong>backend/.env.example:</strong></p>
+<pre><code><span class="cm"># URL del frontend (usada para el control CORS)</span>
+FRONTEND_URL=http://localhost:5173</code></pre>
+
+<p><strong>frontend/.env.example:</strong></p>
+<pre><code><span class="cm"># URL del backend</span>
+VITE_API_URL=http://localhost:8000</code></pre>
+
+<p>Para usarlos: copia el archivo, renómbralo a <code>.env</code> (sin <em>.example</em>) y rellena los valores. El <code>.env</code> real no se sube a GitHub.</p>
+
+<h2><span class="filepath">backend/requirements.txt</span> — Librerías Python</h2>
+
+<p>Lista de librerías Python que necesita el proyecto. Se instalan con un solo comando:</p>
+
+<pre><code>fastapi==0.104.1        <span class="cm"># Framework para crear el servidor web (la "cocina")</span>
+uvicorn[standard]==...  <span class="cm"># Programa que arranca y gestiona el servidor</span>
+pydantic==2.5.0         <span class="cm"># Valida automáticamente que los datos recibidos son correctos</span>
+python-dotenv==1.0.0    <span class="cm"># Lee las variables del archivo .env</span></code></pre>
+
+<h2><span class="filepath">frontend/package.json</span> — Librerías JavaScript</h2>
+
+<p>El equivalente de <code>requirements.txt</code> para el mundo JavaScript:</p>
+
+<pre><code>{
+  "dependencies": {
+    "react": "^18.2.0",             <span class="cm">// Framework para construir interfaces de usuario</span>
+    "react-dom": "^18.2.0",         <span class="cm">// Conecta React con el navegador</span>
+    "react-router-dom": "^6.21.0",  <span class="cm">// Navegación entre pantallas sin recargar la página</span>
+    "lucide-react": "^0.309.0"      <span class="cm">// Iconos (casa, trofeo, reloj, papelera...)</span>
+  }
+}</code></pre>
+
+<h2><span class="filepath">frontend/vite.config.js</span> — Configuración del servidor de desarrollo</h2>
+
+<pre><code><span class="kw">export default</span> {
+  plugins: [react()],   <span class="cm">// Activa el soporte para JSX (mezcla de JS y HTML)</span>
+  server: {
+    port: <span class="nm">5173</span>,         <span class="cm">// El frontend vive en http://localhost:5173</span>
+    proxy: {
+      <span class="st">'/api'</span>: { target: <span class="st">'http://localhost:8000'</span> }
+      <span class="cm">// Las peticiones a /api se redirigen automáticamente al backend</span>
+    }
+  }
+}</code></pre>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">💡</span>
+  <div class="callout-body">
+    <div class="callout-title">¿Qué es un puerto?</div>
+    <div class="callout-text">Un puerto es como el número de apartamento de una dirección. Tu ordenador es el edificio (localhost), y cada aplicación tiene su propio apartamento. El backend vive en el <strong>8000</strong>, el frontend en el <strong>5173</strong>.</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ 3 ═════════════ -->
+<h1 class="section" id="s3"><span class="num">3</span>El Backend — Python con FastAPI</h1>
+
+<h2><span class="filepath">backend/main.py</span> — El punto de entrada del servidor</h2>
+
+<p>Este archivo arranca el servidor y define el único endpoint (<em>dirección</em>) que acepta peticiones.</p>
+
+<h3>1. Importar librerías</h3>
+
+<pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, field_validator
+<span class="kw">from</span> logic.calculator <span class="kw">import</span> calculate_settlements</code></pre>
+
+<p><code>import</code> es como "abrir la caja de herramientas y sacar lo que necesitas".</p>
+
+<h3>2. Crear la aplicación</h3>
+
+<pre><code>app = FastAPI(title=<span class="st">"TekaPoker API"</span>, version=<span class="st">"1.0.0"</span>)</code></pre>
+
+<p>Crea el servidor. La variable <code>app</code> representa toda la aplicación.</p>
+
+<h3>3. Configurar CORS</h3>
+
+<pre><code>app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="st">"http://localhost:5173"</span>, ...],
+    allow_methods=[<span class="st">"*"</span>],
+    allow_headers=[<span class="st">"*"</span>],
+)</code></pre>
+
+<p>CORS es un mecanismo de seguridad del navegador: por defecto, una página web no puede llamar a un servidor en otro puerto. Este middleware lo permite explícitamente para el frontend.</p>
+
+<h3>4. Modelos de datos (validación automática)</h3>
+
+<pre><code><span class="kw">class</span> Player(BaseModel):
+    name: <span class="op">str</span>      <span class="cm"># str = texto</span>
+    points: <span class="op">float</span>  <span class="cm"># float = número con decimales</span>
+
+<span class="kw">class</span> GameRequest(BaseModel):
+    players: List[Player]   <span class="cm"># lista de jugadores</span>
+    buy_in: <span class="op">float</span>           <span class="cm"># cantidad en euros</span>
+
+    <span class="cm"># Validación extra: al menos 2 jugadores</span>
+    @field_validator(<span class="st">"players"</span>)
+    <span class="kw">def</span> must_have_at_least_two(cls, players):
+        <span class="kw">if</span> <span class="op">len</span>(players) &lt; <span class="nm">2</span>:
+            <span class="kw">raise</span> ValueError(<span class="st">"At least 2 players are required"</span>)
+        <span class="kw">return</span> players</code></pre>
+
+<p>Pydantic valida automáticamente que los datos recibidos tienen el tipo correcto. Si alguien envía <code>points: "hola"</code>, el servidor devuelve un error claro sin que tú tengas que comprobarlo.</p>
+
+<h3>5. Los endpoints</h3>
+
+<pre><code><span class="cm"># GET / → "¿hay alguien en casa?"</span>
+@app.get(<span class="st">"/"</span>)
+<span class="kw">def</span> root():
+    <span class="kw">return</span> {<span class="st">"message"</span>: <span class="st">"TekaPoker API is running!"</span>}
+
+<span class="cm"># POST /calculate → el endpoint principal</span>
+@app.post(<span class="st">"/calculate"</span>)
+<span class="kw">def</span> calculate(request: GameRequest):
+    players_data = [
+        {<span class="st">"name"</span>: p.name, <span class="st">"points"</span>: p.points}
+        <span class="kw">for</span> p <span class="kw">in</span> request.players
+    ]
+    result = calculate_settlements(players_data, request.buy_in)
+    <span class="kw">return</span> result</code></pre>
+
+<p>Una <strong>ruta</strong> es una dirección a la que puedes llamar. <code>@app.post("/calculate")</code> significa "cuando alguien envíe datos a <code>/calculate</code>, ejecuta esta función". FastAPI convierte automáticamente el JSON recibido en objetos Python, y el diccionario devuelto en JSON de respuesta.</p>
+
+
+<!-- ═══════════════════════════════════════ 4 ═════════════ -->
+<h1 class="section" id="s4"><span class="num">4</span>La lógica de cálculo de pagos</h1>
+
+<h2><span class="filepath">backend/logic/calculator.py</span></h2>
+
+<p>Este es el archivo más importante del proyecto. Contiene toda la matemática, explicada paso a paso. Lo vamos a analizar con un ejemplo concreto.</p>
+
+<div class="callout callout--gold">
+  <span class="callout-icon">🃏</span>
+  <div class="callout-body">
+    <div class="callout-title">Ejemplo que usaremos en esta sección</div>
+    <div class="callout-text"><strong>3 jugadores, buy-in €10 cada uno (€30 en el bote)</strong><br>
+    Alicia → 120 puntos &nbsp;·&nbsp; Bob → 80 puntos &nbsp;·&nbsp; Carol → 40 puntos</div>
+  </div>
+</div>
+
+<h3>Paso 1 — Sumar todos los puntos</h3>
+
+<pre><code>total_points = <span class="op">sum</span>(player[<span class="st">"points"</span>] <span class="kw">for</span> player <span class="kw">in</span> players)
+<span class="cm"># total_points = 120 + 80 + 40 = 240</span></code></pre>
+
+<p><code>sum()</code> suma todos los valores. La expresión dentro es un <em>generador</em>: "recorre la lista de jugadores y dame el campo 'points' de cada uno". Necesitamos el total para repartir el dinero proporcionalmente.</p>
+
+<h3>Paso 2 — Calcular el bote total</h3>
+
+<pre><code>num_players = <span class="op">len</span>(players)          <span class="cm"># len() cuenta cuántos elementos hay → 3</span>
+total_money = buy_in * num_players   <span class="cm"># €10 × 3 = €30</span></code></pre>
+
+<p><code>len()</code> cuenta los elementos de una lista. El bote es lo que pagó cada jugador multiplicado por cuántos hay.</p>
+
+<h3>Paso 3 — Valor de cada punto</h3>
+
+<pre><code><span class="kw">if</span> total_points == <span class="nm">0</span>:
+    value_per_point = <span class="nm">0.0</span>        <span class="cm"># Protección: evita dividir por cero</span>
+<span class="kw">else</span>:
+    value_per_point = total_money / total_points
+<span class="cm"># value_per_point = €30 / 240 = €0.125 por punto</span></code></pre>
+
+<p>El <code>if total_points == 0</code> protege contra un error matemático: en Python (como en cualquier sistema), no se puede dividir por cero.</p>
+
+<h3>Paso 4 — Dinero final de cada jugador</h3>
+
+<pre><code><span class="kw">for</span> player <span class="kw">in</span> players:
+    player[<span class="st">"final_money"</span>] = <span class="op">round</span>(player[<span class="st">"points"</span>] * value_per_point, <span class="nm">2</span>)</code></pre>
+
+<p><code>for player in players</code> significa "repite esto para cada jugador de la lista". <code>round(..., 2)</code> redondea a 2 decimales (centavos), evitando números como €14,9999999...</p>
+
+<table class="calc-table">
+  <thead><tr><th>Jugador</th><th>Puntos</th><th>× €0,125</th><th>= Dinero final</th></tr></thead>
+  <tbody>
+    <tr><td>Alicia</td><td>120</td><td>× 0,125</td><td><strong>€15,00</strong></td></tr>
+    <tr><td>Bob</td><td>80</td><td>× 0,125</td><td><strong>€10,00</strong></td></tr>
+    <tr><td>Carol</td><td>40</td><td>× 0,125</td><td><strong>€5,00</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Paso 5 — Ganancia o pérdida neta</h3>
+
+<pre><code>net = <span class="op">round</span>(player[<span class="st">"final_money"</span>] - buy_in, <span class="nm">2</span>)
+<span class="cm"># Alicia: €15 − €10 = +€5,00  ← GANÓ</span>
+<span class="cm"># Bob:    €10 − €10 =  €0,00  ← empató</span>
+<span class="cm"># Carol:   €5 − €10 = −€5,00  ← PERDIÓ</span></code></pre>
+
+<div class="callout callout--green">
+  <span class="callout-icon">✅</span>
+  <div class="callout-body">
+    <div class="callout-title">Comprobación matemática</div>
+    <div class="callout-text">La suma de todas las ganancias netas siempre debe ser €0. El dinero no desaparece, solo cambia de manos: (+€5) + (€0) + (−€5) = €0.</div>
+  </div>
+</div>
+
+<h3>Paso 6 — Separar en acreedores y deudores</h3>
+
+<pre><code>TOLERANCE = <span class="nm">0.01</span>  <span class="cm"># 1 céntimo (diferencias menores se ignoran)</span>
+
+creditors = [                          <span class="cm"># Jugadores que ganaron → les deben pagar</span>
+    {<span class="st">"name"</span>: b[<span class="st">"name"</span>], <span class="st">"amount"</span>: b[<span class="st">"net"</span>]}
+    <span class="kw">for</span> b <span class="kw">in</span> balances
+    <span class="kw">if</span> b[<span class="st">"net"</span>] > TOLERANCE
+]
+
+debtors = [                            <span class="cm"># Jugadores que perdieron → deben pagar</span>
+    {<span class="st">"name"</span>: b[<span class="st">"name"</span>], <span class="st">"amount"</span>: <span class="op">abs</span>(b[<span class="st">"net"</span>])}
+    <span class="kw">for</span> b <span class="kw">in</span> balances
+    <span class="kw">if</span> b[<span class="st">"net"</span>] &lt; -TOLERANCE
+]
+<span class="cm"># abs(-5) = 5  ← convierte negativo en positivo para facilitar el cálculo</span></code></pre>
+
+<table>
+  <thead><tr><th>Jugador</th><th>Net</th><th>Rol</th></tr></thead>
+  <tbody>
+    <tr><td>Alicia</td><td style="color:var(--green)">+€5,00</td><td>Acreedor (le deben)</td></tr>
+    <tr><td>Bob</td><td>€0,00</td><td>Neutral (ignorado)</td></tr>
+    <tr><td>Carol</td><td style="color:var(--red)">−€5,00</td><td>Deudor (debe pagar)</td></tr>
+  </tbody>
+</table>
+
+<h3>Paso 7 — El algoritmo voraz (greedy)</h3>
+
+<p>El objetivo es producir el <strong>mínimo número de transferencias</strong> posible para saldar todas las deudas.</p>
+
+<pre><code><span class="cm"># 1. Ordenar de mayor a menor (los más grandes primero)</span>
+creditors.sort(key=<span class="kw">lambda</span> x: x[<span class="st">"amount"</span>], reverse=<span class="kw">True</span>)
+debtors.sort(key=<span class="kw">lambda</span> x: x[<span class="st">"amount"</span>], reverse=<span class="kw">True</span>)
+
+<span class="kw">while</span> cred_index &lt; <span class="op">len</span>(creditors) <span class="kw">and</span> debt_index &lt; <span class="op">len</span>(debtors):
+    creditor = creditors[cred_index]
+    debtor   = debtors[debt_index]
+
+    <span class="cm"># 2. La transferencia es el mínimo entre lo que debe el deudor</span>
+    <span class="cm">#    y lo que le deben al acreedor</span>
+    amount = <span class="op">round</span>(<span class="op">min</span>(creditor[<span class="st">"amount"</span>], debtor[<span class="st">"amount"</span>]), <span class="nm">2</span>)
+
+    transactions.append({
+        <span class="st">"from"</span>:   debtor[<span class="st">"name"</span>],    <span class="cm"># el deudor paga</span>
+        <span class="st">"to"</span>:     creditor[<span class="st">"name"</span>],  <span class="cm"># el acreedor recibe</span>
+        <span class="st">"amount"</span>: amount
+    })
+
+    <span class="cm"># 3. Restar la cantidad transferida de ambos saldos</span>
+    creditor[<span class="st">"amount"</span>] -= amount
+    debtor[<span class="st">"amount"</span>]   -= amount
+
+    <span class="cm"># 4. Si alguien llegó a 0, pasar al siguiente</span>
+    <span class="kw">if</span> creditor[<span class="st">"amount"</span>] &lt;= TOLERANCE: cred_index += <span class="nm">1</span>
+    <span class="kw">if</span> debtor[<span class="st">"amount"</span>]   &lt;= TOLERANCE: debt_index += <span class="nm">1</span></code></pre>
+
+<p><strong>Traza del algoritmo con el ejemplo sencillo:</strong></p>
+
+<table>
+  <thead><tr><th>Ronda</th><th>Acreedor</th><th>Deudor</th><th>Transferencia</th><th>Saldo acreedor</th><th>Saldo deudor</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Alicia (€5)</td><td>Carol (€5)</td><td>€5,00</td><td style="color:var(--green)">€0 ✓</td><td style="color:var(--green)">€0 ✓</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Resultado:</strong> Carol le paga €5 a Alicia. ¡Una sola transferencia!</p>
+
+<p><strong>Ejemplo más complejo (4 jugadores):</strong> Dave ganó €10, Alicia ganó €2, Bob perdió €7, Carol perdió €5.</p>
+
+<table>
+  <thead><tr><th>Ronda</th><th>Acreedor</th><th>Deudor</th><th>Pago</th><th>Saldos restantes</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Dave (€10)</td><td>Bob (€7)</td><td>€7,00</td><td>Dave: €3, Bob: €0</td></tr>
+    <tr><td>2</td><td>Dave (€3)</td><td>Carol (€5)</td><td>€3,00</td><td>Dave: €0, Carol: €2</td></tr>
+    <tr><td>3</td><td>Alicia (€2)</td><td>Carol (€2)</td><td>€2,00</td><td>Todos a €0</td></tr>
+  </tbody>
+</table>
+
+<p>Solo <strong>3 transferencias</strong> en lugar de las posibles 6 si cada uno pagara a cada uno.</p>
+
+
+<!-- ═══════════════════════════════════════ 5 ═════════════ -->
+<h1 class="section" id="s5"><span class="num">5</span>El Frontend — React con Vite</h1>
+
+<h2>¿Qué es React?</h2>
+
+<p>React es una librería de JavaScript para construir interfaces de usuario. La idea clave: defines <strong>componentes</strong> (bloques reutilizables) y React actualiza la pantalla automáticamente cuando los datos cambian, sin necesidad de recargar la página.</p>
+
+<h2><span class="filepath">src/main.jsx</span> — El punto de entrada</h2>
+
+<pre><code>ReactDOM.createRoot(document.getElementById(<span class="st">'root'</span>)).render(
+  &lt;BrowserRouter&gt;
+    &lt;App /&gt;
+  &lt;/BrowserRouter&gt;
+)</code></pre>
+
+<ol class="steps">
+  <li>Encuentra el <code>&lt;div id="root"&gt;</code> del archivo HTML</li>
+  <li>Envuelve toda la app en <code>BrowserRouter</code> (el sistema de navegación entre pantallas)</li>
+  <li>"Renderiza" (dibuja) el componente <code>App</code> dentro de ese div</li>
+</ol>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">💡</span>
+  <div class="callout-body">
+    <div class="callout-title">¿Qué es JSX?</div>
+    <div class="callout-text">Los archivos .jsx mezclan JavaScript con etiquetas que parecen HTML (<code>&lt;BrowserRouter&gt;</code>, <code>&lt;App /&gt;</code>). A esto se le llama <strong>JSX</strong>. Vite convierte automáticamente este código en JavaScript puro antes de enviarlo al navegador.</div>
+  </div>
+</div>
+
+<h2><span class="filepath">src/App.jsx</span> — El enrutador principal</h2>
+
+<pre><code><span class="kw">export default function</span> App() {
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"app-container"</span>&gt;
+      &lt;Routes&gt;
+        &lt;Route path=<span class="st">"/"</span>          element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=<span class="st">"/new-game"</span>  element={&lt;NewGame /&gt;} /&gt;
+        &lt;Route path=<span class="st">"/results"</span>   element={&lt;Results /&gt;} /&gt;
+        &lt;Route path=<span class="st">"/history"</span>   element={&lt;History /&gt;} /&gt;
+        &lt;Route path=<span class="st">"/ranking"</span>   element={&lt;Ranking /&gt;} /&gt;
+      &lt;/Routes&gt;
+      &lt;Navbar /&gt;   <span class="cm">// siempre visible en todas las pantallas</span>
+    &lt;/div&gt;
+  )
+}</code></pre>
+
+<p>Cuando la URL cambia, React muestra el componente correspondiente <strong>sin recargar la página</strong>. <code>Navbar</code> está fuera de <code>Routes</code> porque aparece en todas las pantallas.</p>
+
+<h2><span class="filepath">src/styles/global.css</span> — El diseño visual</h2>
+
+<p>Define el sistema de diseño completo usando <strong>variables CSS</strong>:</p>
+
+<pre><code><span class="cm">/* Variables que se usan en toda la app */</span>
+:root {
+  --bg:    #080d0a;   <span class="cm">/* Fondo: verde muy oscuro, casi negro */</span>
+  --green: #4ade80;   <span class="cm">/* Verde brillante para ganancias */</span>
+  --red:   #f87171;   <span class="cm">/* Rojo para pérdidas */</span>
+  --gold:  #fbbf24;   <span class="cm">/* Dorado para el ranking */</span>
+}</code></pre>
+
+<p>Las variables CSS permiten cambiar el verde de toda la app modificando <strong>una sola línea</strong>. En lugar de buscar <code>#4ade80</code> en 50 sitios, usas <code>var(--green)</code> y cambias el valor en un solo lugar.</p>
+
+
+<!-- ═══════════════════════════════════════ 6 ═════════════ -->
+<h1 class="section" id="s6"><span class="num">6</span>Los servicios: comunicación y almacenamiento</h1>
+
+<h2><span class="filepath">src/services/api.js</span> — El mensajero</h2>
+
+<pre><code><span class="kw">const</span> API_URL = import.meta.env.VITE_API_URL || <span class="st">'http://localhost:8000'</span>
+
+<span class="kw">export async function</span> calculateSettlements(players, buyIn) {
+  <span class="kw">const</span> response = <span class="kw">await</span> fetch(`${API_URL}/calculate`, {
+    method: <span class="st">'POST'</span>,                                     <span class="cm">// tipo de petición</span>
+    headers: { <span class="st">'Content-Type'</span>: <span class="st">'application/json'</span> },    <span class="cm">// formato del mensaje</span>
+    body: JSON.stringify({ players, buy_in: buyIn }),   <span class="cm">// datos a enviar</span>
+  })
+
+  <span class="kw">if</span> (!response.ok) <span class="kw">throw new</span> Error(detail)  <span class="cm">// si hay error, lanzar excepción</span>
+  <span class="kw">return</span> response.json()                      <span class="cm">// convertir respuesta JSON a objeto JS</span>
+}</code></pre>
+
+<table>
+  <thead><tr><th>Concepto</th><th>Explicación simple</th></tr></thead>
+  <tbody>
+    <tr><td><code>fetch</code></td><td>Función del navegador para hacer peticiones HTTP a servidores, como enviar un SMS</td></tr>
+    <tr><td><code>async / await</code></td><td>"Espera a que el servidor responda antes de continuar" (el servidor puede tardar)</td></tr>
+    <tr><td><code>method: 'POST'</code></td><td>Tipo de petición para enviar datos (GET es para pedir datos, POST para enviarlos)</td></tr>
+    <tr><td><code>JSON.stringify()</code></td><td>Convierte un objeto JavaScript en texto JSON para enviarlo por la red</td></tr>
+    <tr><td><code>response.json()</code></td><td>Convierte la respuesta JSON de vuelta en un objeto JavaScript</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="filepath">src/services/storage.js</span> — La memoria de la app</h2>
+
+<p>Como no hay base de datos, todo se guarda en <strong>localStorage</strong>: un pequeño cajón de almacenamiento que tiene cada navegador en el ordenador del usuario. Los datos persisten aunque se cierre el navegador.</p>
+
+<pre><code><span class="kw">const</span> KEY = <span class="st">'tekapoker_games'</span>   <span class="cm">// El "nombre del cajón"</span>
+
+<span class="cm">// Leer todas las partidas guardadas</span>
+<span class="kw">export function</span> getGames() {
+  <span class="kw">const</span> raw = localStorage.getItem(KEY)   <span class="cm">// Abre el cajón y lee</span>
+  <span class="kw">return</span> raw ? JSON.parse(raw) : []        <span class="cm">// Si hay algo, lo devuelve; si no, lista vacía</span>
+}
+
+<span class="cm">// Guardar una partida nueva (la añade al principio)</span>
+<span class="kw">export function</span> saveGame(gameData) {
+  <span class="kw">const</span> games = getGames()
+  <span class="kw">const</span> newGame = { id: String(Date.now()), ...gameData }
+  <span class="cm">// Date.now() = milisegundos desde 1970, sirve como ID único</span>
+  localStorage.setItem(KEY, JSON.stringify([newGame, ...games]))
+}
+
+<span class="cm">// Borrar una partida por su ID</span>
+<span class="kw">export function</span> deleteGame(id) {
+  <span class="kw">const</span> updated = getGames().filter((g) =&gt; g.id !== id)
+  <span class="cm">// filter() crea una lista nueva sin el elemento que tiene ese ID</span>
+  localStorage.setItem(KEY, JSON.stringify(updated))
+}
+
+<span class="cm">// Calcular la clasificación acumulada de todos los juegos</span>
+<span class="kw">export function</span> getRanking() {
+  <span class="kw">const</span> map = {}   <span class="cm">// diccionario: nombre → { net, games, wins }</span>
+
+  <span class="kw">for</span> (<span class="kw">const</span> game <span class="kw">of</span> getGames()) {
+    <span class="kw">for</span> (<span class="kw">const</span> balance <span class="kw">of</span> game.balances) {
+      <span class="kw">if</span> (!map[balance.name]) map[balance.name] = { net: <span class="nm">0</span>, games: <span class="nm">0</span>, wins: <span class="nm">0</span> }
+      map[balance.name].net   += balance.net   <span class="cm">// acumula ganancias totales</span>
+      map[balance.name].games += <span class="nm">1</span>
+      <span class="kw">if</span> (balance.net > <span class="nm">0</span>) map[balance.name].wins += <span class="nm">1</span>
+    }
+  }
+
+  <span class="kw">return</span> Object.values(map).sort((a, b) =&gt; b.net - a.net)
+  <span class="cm">// Convierte el diccionario en lista y ordena de mayor a menor ganancia</span>
+}</code></pre>
+
+
+<!-- ═══════════════════════════════════════ 7 ═════════════ -->
+<h1 class="section" id="s7"><span class="num">7</span>Los componentes: piezas reutilizables</h1>
+
+<p>Los <strong>componentes</strong> son como piezas de LEGO. Los defines una vez y los usas en varios sitios.</p>
+
+<h2><span class="filepath">Navbar.jsx</span> — Barra de navegación inferior</h2>
+
+<pre><code><span class="kw">const</span> NAV_ITEMS = [
+  { to: <span class="st">'/'</span>,         icon: Home,       label: <span class="st">'Home'</span>    },
+  { to: <span class="st">'/new-game'</span>, icon: PlusCircle, label: <span class="st">'New Game'</span> },
+  { to: <span class="st">'/history'</span>,  icon: Clock,      label: <span class="st">'History'</span>  },
+  { to: <span class="st">'/ranking'</span>,  icon: Trophy,     label: <span class="st">'Ranking'</span>  },
+]
+
+<span class="kw">export default function</span> Navbar() {
+  <span class="kw">return</span> (
+    &lt;nav className=<span class="st">"navbar"</span>&gt;
+      {NAV_ITEMS.map(({ to, icon: Icon, label }) =&gt; (
+        &lt;NavLink key={to} to={to}
+          className={({ isActive }) =&gt; `nav-item${isActive ? <span class="st">' active'</span> : <span class="st">''</span>}`}&gt;
+          &lt;Icon size={22} /&gt;
+          &lt;span&gt;{label}&lt;/span&gt;
+        &lt;/NavLink&gt;
+      ))}
+    &lt;/nav&gt;
+  )
+}</code></pre>
+
+<p><code>.map()</code> recorre la lista y transforma cada elemento en JSX visual. <code>NavLink</code> detecta si la URL actual coincide con <code>to</code>, añadiendo la clase <code>active</code> para iluminar el ícono en verde.</p>
+
+<h2><span class="filepath">PlayerInput.jsx</span> — Fila de jugador en el formulario</h2>
+
+<p>Recibe <strong>props</strong> (propiedades) del componente padre: el objeto jugador, su posición, y funciones para actualizar o eliminar. Muestra dos campos de texto (nombre y puntos) y un botón de borrar.</p>
+
+<h2><span class="filepath">BalanceCard.jsx</span> — Tarjeta de resultado</h2>
+
+<p>Muestra nombre, puntos y ganancia/pérdida. Aplica clase verde, roja o gris según el resultado usando operadores ternarios:</p>
+
+<pre><code><span class="kw">const</span> isWin  = net &gt;  <span class="nm">0.005</span>   <span class="cm">// Ganó → verde</span>
+<span class="kw">const</span> isLose = net &lt; <span class="nm">-0.005</span>   <span class="cm">// Perdió → rojo</span>
+<span class="cm">// Si no es ninguno de los dos → gris (empató)</span>
+
+<span class="kw">const</span> rowClass = isWin  ? <span class="st">'balance-row balance-row--win'</span>
+               : isLose ? <span class="st">'balance-row balance-row--lose'</span>
+               :           <span class="st">'balance-row balance-row--even'</span></code></pre>
+
+<h2><span class="filepath">TransactionCard.jsx</span> — Tarjeta de pago</h2>
+
+<p>Muestra una transferencia como "Bob → Alicia €5,00". El que paga aparece en rojo, el que cobra en verde.</p>
+
+<h2><span class="filepath">ConfirmDialog.jsx</span> — Diálogo de confirmación</h2>
+
+<p>Modal que aparece desde abajo al borrar una partida. Clic en el fondo oscuro lo cierra. <code>stopPropagation()</code> evita que el clic dentro del modal se propague al fondo y lo cierre accidentalmente.</p>
+
+<h2><span class="filepath">LoadingSpinner.jsx</span> — Indicador de carga</h2>
+
+<p>Círculo que gira mientras se espera respuesta del backend. Implementado con animación CSS pura:</p>
+
+<pre><code><span class="cm">/* En global.css */</span>
+.spinner {
+  border: 2px solid rgba(255,255,255,.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;  <span class="cm">/* Gira sin parar */</span>
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }</code></pre>
+
+
+<!-- ═══════════════════════════════════════ 8 ═════════════ -->
+<h1 class="section" id="s8"><span class="num">8</span>Las páginas: las pantallas de la app</h1>
+
+<h2><span class="filepath">Home.jsx</span> — Pantalla de inicio</h2>
+
+<p>Lee datos del localStorage y muestra estadísticas, un botón de nueva partida y el líder actual.</p>
+
+<pre><code><span class="kw">const</span> games   = getGames()        <span class="cm">// Lee partidas guardadas</span>
+<span class="kw">const</span> ranking = getRanking()      <span class="cm">// Calcula la clasificación</span>
+<span class="kw">const</span> totalPot = games.reduce(
+  (sum, g) =&gt; sum + g.buy_in * g.players.length, <span class="nm">0</span>
+)
+<span class="cm">// reduce() acumula valores: empieza en 0 y va sumando el bote de cada partida</span></code></pre>
+
+<h2><span class="filepath">NewGame.jsx</span> — Formulario de nueva partida</h2>
+
+<p>La pantalla más compleja. Gestiona el estado con <code>useState</code>:</p>
+
+<pre><code><span class="kw">const</span> [gameName,  setGameName]  = useState(<span class="st">''</span>)
+<span class="kw">const</span> [buyIn,     setBuyIn]     = useState(<span class="st">''</span>)
+<span class="kw">const</span> [players,   setPlayers]   = useState([newPlayer(), newPlayer()])
+<span class="kw">const</span> [isLoading, setLoading]   = useState(<span class="kw">false</span>)
+<span class="kw">const</span> [error,     setError]     = useState(<span class="st">''</span>)</code></pre>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">💡</span>
+  <div class="callout-body">
+    <div class="callout-title">¿Qué es useState?</div>
+    <div class="callout-text"><code>useState</code> crea una variable reactiva. Cuando cambias su valor con el setter (ej: <code>setError("Mensaje")</code>), React actualiza la pantalla automáticamente para reflejar el cambio. Es la base de React.</div>
+  </div>
+</div>
+
+<p>El envío usa <code>async/await</code> con manejo de errores:</p>
+
+<pre><code><span class="kw">async function</span> handleCalculate() {
+  setError(<span class="st">''</span>)
+  <span class="kw">const</span> validationError = validate()
+  <span class="kw">if</span> (validationError) { setError(validationError); <span class="kw">return</span> }
+
+  setLoading(<span class="kw">true</span>)
+  <span class="kw">try</span> {
+    <span class="kw">const</span> result = <span class="kw">await</span> calculateSettlements(players, buyIn)
+    navigate(<span class="st">'/results'</span>, { state: { result, gameData } })
+    <span class="cm">// navigate pasa los datos a la siguiente pantalla, como un sobre con info</span>
+  } <span class="kw">catch</span> (err) {
+    setError(err.message)    <span class="cm">// Si hay error, mostrarlo al usuario</span>
+  } <span class="kw">finally</span> {
+    setLoading(<span class="kw">false</span>)       <span class="cm">// Pase lo que pase, quitar el spinner</span>
+  }
+}</code></pre>
+
+<h2><span class="filepath">Results.jsx</span> — Pantalla de resultados</h2>
+
+<pre><code><span class="kw">const</span> { result, gameData } = useLocation().state || {}
+<span class="cm">// Recoge los datos que pasó NewGame al navegar</span>
+
+<span class="kw">const</span> sortedBalances = [...balances].sort((a, b) =&gt; b.net - a.net)
+<span class="cm">// [...balances] crea una copia del array sin modificar el original</span>
+<span class="cm">// .sort() ordena: ganadores arriba, perdedores abajo</span></code></pre>
+
+<h2><span class="filepath">History.jsx</span> — Historial de partidas</h2>
+
+<p>Lista de partidas guardadas, expandibles. El botón de borrar no actúa inmediatamente: guarda el ID en <code>deleteTarget</code>, lo que hace aparecer el <code>ConfirmDialog</code>. Solo si el usuario confirma se borra.</p>
+
+<h2><span class="filepath">Ranking.jsx</span> — Clasificación</h2>
+
+<p>Podio visual para el top 3 (bloques de diferente altura) y tabla completa de todos los jugadores ordenados por ganancia total.</p>
+
+
+<!-- ═══════════════════════════════════════ 9 ═════════════ -->
+<h1 class="section" id="s9"><span class="num">9</span>Comunicación frontend ↔ backend</h1>
+
+<h2>Flujo completo de una petición</h2>
+
+<div class="flow">
+<span class="col-header">USUARIO              FRONTEND (React)               BACKEND (Python)</span>
+  │                        │                                 │
+  │ Rellena formulario      │                                 │
+  │ Pulsa Calculate ───────▶│                                 │
+  │                        │ validate() ✓                    │
+  │                        │ setLoading(true)                │
+  │                        │                                 │
+  │                        │─── <span class="arrow">POST /calculate</span> ─────────▶│
+  │                        │    { players, buy_in }          │
+  │                        │                                 │ <span class="note">FastAPI valida JSON</span>
+  │                        │                                 │ <span class="note">calculate_settlements()</span>
+  │                        │                                 │ <span class="note">→ cálculos matemáticos</span>
+  │                        │                                 │
+  │                        │◀── <span class="arrow">respuesta JSON</span> ────────────│
+  │                        │    { balances, transactions }   │
+  │                        │                                 │
+  │                        │ setLoading(false)               │
+  │                        │ navigate('/results')            │
+  │◀─── pantalla resultados │                                 │
+</div>
+
+<h2>El formato JSON</h2>
+
+<p>JSON (JavaScript Object Notation) es texto estructurado que tanto Python como JavaScript entienden perfectamente. Así se ven los datos viajando por la red:</p>
+
+<div class="summary-grid">
+  <div class="summary-item">
+    <div class="label">Petición (frontend → backend)</div>
+    <div class="value">
+<pre style="margin:0; background:#1e3a5f; border-left-color:#38bdf8; font-size:.75rem;">{
+  "players": [
+    {"name": "Alicia", "points": 120},
+    {"name": "Bob",    "points": 80}
+  ],
+  "buy_in": 10
+}</pre>
+    </div>
+  </div>
+  <div class="summary-item">
+    <div class="label">Respuesta (backend → frontend)</div>
+    <div class="value">
+<pre style="margin:0; background:#1a3a1e; border-left-color:#4ade80; font-size:.75rem;">{
+  "balances": [
+    {"name": "Alicia", "net": 5.0},
+    {"name": "Bob",    "net": -5.0}
+  ],
+  "transactions": [
+    {"from": "Bob", "to": "Alicia",
+     "amount": 5.0}
+  ]
+}</pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ 10 ════════════ -->
+<h1 class="section" id="s10"><span class="num">10</span>Cómo arrancar el proyecto</h1>
+
+<h2>Prerequisitos (instalar una sola vez)</h2>
+
+<table>
+  <thead><tr><th>Herramienta</th><th>Para qué sirve</th><th>Dónde descargar</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Python 3.10+</strong></td><td>Ejecutar el backend</td><td>python.org</td></tr>
+    <tr><td><strong>Node.js 18+</strong></td><td>Ejecutar el frontend</td><td>nodejs.org</td></tr>
+    <tr><td><strong>Terminal</strong></td><td>Escribir comandos</td><td>Símbolo del sistema (Windows) / Terminal (Mac)</td></tr>
+  </tbody>
+</table>
+
+<h2>Arrancar el Backend</h2>
+
+<pre><code>cd backend</code></pre>
+<p><code>cd</code> = "Change Directory". Entra en la carpeta <code>backend</code>.</p>
+
+<pre><code>pip install -r requirements.txt</code></pre>
+<p><code>pip</code> es el instalador de paquetes de Python. Descarga FastAPI, Uvicorn y las demás librerías. <strong>Solo hay que ejecutarlo la primera vez.</strong></p>
+
+<pre><code>uvicorn main:app --reload</code></pre>
+<ul>
+  <li><code>uvicorn</code> — el programa que ejecuta el servidor web</li>
+  <li><code>main:app</code> — "en el archivo <code>main.py</code>, busca la variable llamada <code>app</code>"</li>
+  <li><code>--reload</code> — reinicia el servidor automáticamente al cambiar el código (ideal para desarrollar)</li>
+</ul>
+
+<div class="callout callout--green">
+  <span class="callout-icon">✅</span>
+  <div class="callout-body">
+    <div class="callout-title">El servidor está listo cuando ves</div>
+    <div class="callout-text"><code>INFO: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)</code></div>
+  </div>
+</div>
+
+<h2>Arrancar el Frontend</h2>
+
+<p>Abre un <strong>segundo terminal</strong> (deja el del backend abierto):</p>
+
+<pre><code>cd frontend
+npm install</code></pre>
+<p><code>npm</code> es el instalador de paquetes de Node.js. Descarga todas las librerías de <code>package.json</code>. <strong>Solo la primera vez.</strong></p>
+
+<pre><code>npm run dev</code></pre>
+<p>Arranca el servidor de desarrollo. Vite compila el código y lo sirve en <code>http://localhost:5173</code>.</p>
+
+<div class="callout callout--green">
+  <span class="callout-icon">✅</span>
+  <div class="callout-body">
+    <div class="callout-title">El frontend está listo cuando ves</div>
+    <div class="callout-text"><code>VITE ready in 300ms → Local: http://localhost:5173</code><br>
+    Abre esa dirección en el navegador.</div>
+  </div>
+</div>
+
+<h2>Resumen de comandos</h2>
+
+<table>
+  <thead><tr><th>Terminal 1 — Backend</th><th>Terminal 2 — Frontend</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>cd backend</code><br>
+        <code>pip install -r requirements.txt</code><br>
+        <code>uvicorn main:app --reload</code>
+      </td>
+      <td>
+        <code>cd frontend</code><br>
+        <code>npm install</code><br>
+        <code>npm run dev</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout--gold">
+  <span class="callout-icon">⚠️</span>
+  <div class="callout-body">
+    <div class="callout-title">Ambos terminales deben estar abiertos al mismo tiempo</div>
+    <div class="callout-text">Si cierras el terminal del backend, el frontend no podrá calcular (mostrará un error de conexión al pulsar "Calculate").</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ 11 ════════════ -->
+<h1 class="section" id="s11"><span class="num">11</span>Ejemplo completo: una partida de principio a fin</h1>
+
+<div class="callout callout--gold">
+  <span class="callout-icon">🃏</span>
+  <div class="callout-body">
+    <div class="callout-title">Escenario</div>
+    <div class="callout-text">Tres amigos jugaron al póker. <strong>Buy-in: €10 cada uno (€30 en el bote)</strong><br>
+    Alicia → 150 puntos (le fue bien) &nbsp;·&nbsp; Bob → 90 puntos (regular) &nbsp;·&nbsp; Carol → 60 puntos (le fue mal)</div>
+  </div>
+</div>
+
+<ol class="steps">
+  <li>
+    <div><strong>Abre la app</strong> en <code>http://localhost:5173</code>. Verás la pantalla de inicio con el título "TekaPoker" y el botón "Start New Game".</div>
+  </li>
+  <li>
+    <div><strong>Pulsa "Start New Game"</strong>. La app navega a <code>/new-game</code> con el formulario vacío.</div>
+  </li>
+  <li>
+    <div><strong>Rellena el formulario:</strong>
+      <table style="margin-top:8px;">
+        <thead><tr><th>Campo</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Game name</td><td>Viernes noche</td></tr>
+          <tr><td>Buy-in</td><td>10</td></tr>
+          <tr><td>Player 1 — Name</td><td>Alicia</td></tr>
+          <tr><td>Player 1 — Points</td><td>150</td></tr>
+          <tr><td>Player 2 — Name</td><td>Bob</td></tr>
+          <tr><td>Player 2 — Points</td><td>90</td></tr>
+          <tr><td>Player 3 — Name</td><td>Carol</td></tr>
+          <tr><td>Player 3 — Points</td><td>60</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </li>
+  <li>
+    <div><strong>Pulsa "Calculate Settlements"</strong>. Aparece el spinner. El frontend envía al backend:</div>
+    <pre><code>{ "players": [{"name":"Alicia","points":150}, {"name":"Bob","points":90}, {"name":"Carol","points":60}], "buy_in": 10 }</code></pre>
+  </li>
+  <li>
+    <div><strong>El backend calcula:</strong>
+      <table style="margin-top:8px;" class="calc-table">
+        <thead><tr><th>Jugador</th><th>Puntos</th><th>Final (× €0,10)</th><th>Net (− €10)</th></tr></thead>
+        <tbody>
+          <tr><td>Alicia</td><td>150</td><td>€15,00</td><td style="color:var(--green)"><strong>+€5,00</strong> ✓ Ganó</td></tr>
+          <tr><td>Bob</td><td>90</td><td>€9,00</td><td style="color:var(--red)"><strong>−€1,00</strong> ✗ Perdió</td></tr>
+          <tr><td>Carol</td><td>60</td><td>€6,00</td><td style="color:var(--red)"><strong>−€4,00</strong> ✗ Perdió</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;"><strong>Algoritmo greedy:</strong> Alicia (€5) vs Carol (€4) → Carol paga €4. Alicia queda en €1. Alicia (€1) vs Bob (€1) → Bob paga €1. Todos a €0.</p>
+    </div>
+  </li>
+  <li>
+    <div><strong>La pantalla de resultados muestra:</strong>
+      <table style="margin-top:8px;">
+        <thead><tr><th>Jugador</th><th>Puntos</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>▲ Alicia</td><td>150 pts</td><td style="color:var(--green)">+€5,00</td></tr>
+          <tr><td>▼ Bob</td><td>90 pts</td><td style="color:var(--red)">−€1,00</td></tr>
+          <tr><td>▼ Carol</td><td>60 pts</td><td style="color:var(--red)">−€4,00</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;"><strong>Pagos a realizar:</strong></p>
+      <table>
+        <thead><tr><th>#</th><th>Paga</th><th>A</th><th>Cantidad</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td style="color:var(--red)">Carol</td><td style="color:var(--green)">Alicia</td><td>€4,00</td></tr>
+          <tr><td>2</td><td style="color:var(--red)">Bob</td><td style="color:var(--green)">Alicia</td><td>€1,00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </li>
+  <li>
+    <div><strong>Guarda la partida</strong> pulsando "Save Game". Los datos se guardan en localStorage.</div>
+  </li>
+  <li>
+    <div><strong>Ve a History</strong>. Verás la partida "Viernes noche" guardada. Pulsa para expandir y ver los detalles. Si quieres borrarla, pulsa "Delete game" y confirma en el diálogo.</div>
+  </li>
+  <li>
+    <div><strong>Ve a Ranking</strong>. Alicia aparece en primer lugar con +€5,00 en ganancia total.</div>
+  </li>
+</ol>
+
+<hr class="divider" />
+
+<!-- Tabla resumen final -->
+<h1 class="section" style="margin-top:40px; border-color:#d97706;" id="resumen"><span class="num" style="background:var(--gold-dark);">★</span>Resumen final</h1>
+
+<table>
+  <thead><tr><th>Archivo</th><th>Tecnología</th><th>¿Qué hace?</th></tr></thead>
+  <tbody>
+    <tr><td><code>backend/main.py</code></td><td>FastAPI</td><td>Recibe peticiones HTTP y las enruta al calculador</td></tr>
+    <tr><td><code>backend/logic/calculator.py</code></td><td>Python puro</td><td>Toda la matemática de pagos: puntos → euros → transferencias</td></tr>
+    <tr><td><code>frontend/src/services/api.js</code></td><td>JavaScript</td><td>Envía datos al backend y recibe la respuesta</td></tr>
+    <tr><td><code>frontend/src/services/storage.js</code></td><td>JavaScript</td><td>Guarda y lee partidas en el localStorage del navegador</td></tr>
+    <tr><td><code>frontend/src/pages/NewGame.jsx</code></td><td>React</td><td>Formulario de entrada de jugadores y buy-in</td></tr>
+    <tr><td><code>frontend/src/pages/Results.jsx</code></td><td>React</td><td>Muestra balances y lista de transferencias</td></tr>
+    <tr><td><code>frontend/src/pages/History.jsx</code></td><td>React</td><td>Historial de partidas guardadas con opción de borrar</td></tr>
+    <tr><td><code>frontend/src/pages/Ranking.jsx</code></td><td>React</td><td>Clasificación acumulada de todos los jugadores</td></tr>
+    <tr><td><code>frontend/src/styles/global.css</code></td><td>CSS</td><td>Todo el diseño visual (colores, tipografía, animaciones)</td></tr>
+    <tr><td><code>.gitignore</code></td><td>Git</td><td>Evita subir archivos innecesarios o privados a GitHub</td></tr>
+    <tr><td><code>.env / .env.example</code></td><td>Configuración</td><td>Guarda URLs y valores que cambian según el entorno</td></tr>
+    <tr><td><code>requirements.txt</code></td><td>Python/pip</td><td>Lista de librerías Python a instalar</td></tr>
+    <tr><td><code>package.json</code></td><td>Node/npm</td><td>Lista de librerías JavaScript a instalar</td></tr>
+  </tbody>
+</table>
+
+<div style="text-align:center; margin-top:60px; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:.8rem;">
+  <div style="font-size:1.4rem; margin-bottom:8px;">♠ ♥ ♦ ♣</div>
+  Guía generada para el proyecto <strong>TekaPoker</strong> · 30 de marzo de 2026
+</div>
+
+</body>
+</html>
