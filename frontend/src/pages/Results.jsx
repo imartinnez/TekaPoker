@@ -44,7 +44,8 @@ export default function Results() {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
-  const totalPot = (gameData.buyIn * gameData.playersData.length).toFixed(2)
+  const totalPot = balances.reduce((sum, b) => sum + b.buyIn, 0).toFixed(2)
+  const allSameBuyIn = balances.every((b) => b.buyIn === balances[0].buyIn)
 
   // ── Save to Supabase ──────────────────────────────────────
   async function handleSave() {
@@ -77,7 +78,9 @@ export default function Results() {
           {gameDate}
         </div>
         <div className="game-meta-sub" style={{ marginTop: 4 }}>
-          {gameData.playersData.length} jugadores · €{gameData.buyIn} buy-in · €{totalPot} bote
+          {gameData.playersData.length} jugadores
+          {allSameBuyIn ? ` · €${balances[0].buyIn.toFixed(2)} buy-in` : ''}
+          {' · '}€{totalPot} bote
         </div>
       </div>
 
@@ -103,7 +106,10 @@ export default function Results() {
             {/* Name + points */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="balance-name">{b.name}</div>
-              <div className="balance-points">{b.points} pts → €{b.finalMoney.toFixed(2)}</div>
+              <div className="balance-points">
+                {!allSameBuyIn && <span style={{ color: 'var(--text-faint)' }}>buy-in €{b.buyIn.toFixed(2)} · </span>}
+                {b.points} pts → €{b.finalMoney.toFixed(2)}
+              </div>
             </div>
 
             {/* Direction icon */}

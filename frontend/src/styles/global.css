@@ -189,6 +189,14 @@ button, input, select, textarea { font-family: inherit; }
   border-radius: 0 0 var(--r-full) var(--r-full);
 }
 
+.nav-item--logout {
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+}
+.nav-item.nav-item--logout:hover { color: var(--red); }
+
 /* ── Card ────────────────────────────────────────────────── */
 .card {
   background: var(--card);

@@ -1,5 +1,5 @@
-import { NavLink } from 'react-router-dom'
-import { Home, PlusCircle, Clock, Trophy, Users } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { Home, PlusCircle, Clock, Trophy, Users, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
   { to: '/',          icon: Home,       label: 'Inicio'   },
@@ -10,6 +10,13 @@ const NAV_ITEMS = [
 ]
 
 export default function Navbar() {
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    localStorage.removeItem('tekapoker_auth')
+    navigate('/login', { replace: true })
+  }
+
   return (
     <nav className="navbar">
       {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
@@ -23,6 +30,13 @@ export default function Navbar() {
           <span>{label}</span>
         </NavLink>
       ))}
+      <button
+        onClick={handleLogout}
+        className="nav-item nav-item--logout"
+      >
+        <LogOut size={18} strokeWidth={1.8} />
+        <span>Salir</span>
+      </button>
     </nav>
   )
 }

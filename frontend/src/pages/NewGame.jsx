@@ -13,7 +13,8 @@ export default function NewGame() {
   const [allPlayers,    setAllPlayers]    = useState([])      // players from DB
   const [selectedIds,   setSelectedIds]   = useState(new Set()) // selected UUIDs
   const [pointsMap,     setPointsMap]     = useState({})      // { [playerId]: string }
-  const [buyIn,         setBuyIn]         = useState('')
+  const [buyInMap,      setBuyInMap]      = useState({})      // { [playerId]: string }
+  const [buyIn,         setBuyIn]         = useState('')      // default buy-in
   const [loadingPlayers, setLoadingPlayers] = useState(true)
   const [calculating,   setCalculating]   = useState(false)
   const [error,         setError]         = useState('')
@@ -45,10 +46,12 @@ export default function NewGame() {
       const next = new Set(prev)
       if (next.has(id)) {
         next.delete(id)
-        // Also clear their points when deselected
         setPointsMap((pm) => { const n = { ...pm }; delete n[id]; return n })
+        setBuyInMap((bm) => { const n = { ...bm }; delete n[id]; return n })
       } else {
         next.add(id)
+        // Pre-fill with current default buy-in
+        setBuyInMap((bm) => ({ ...bm, [id]: buyIn }))
       }
       return next
     })
@@ -58,6 +61,12 @@ export default function NewGame() {
   // ── Update a player's points ─────────────────────────────
   function setPoints(id, value) {
     setPointsMap((prev) => ({ ...prev, [id]: value }))
+    setError('')
+  }
+
+  // ── Update a player's individual buy-in ─────────────────
+  function setPlayerBuyIn(id, value) {
+    setBuyInMap((prev) => ({ ...prev, [id]: value }))
     setError('')
   }
 
@@ -80,16 +89,17 @@ export default function NewGame() {
 
   // ── Validation ──────────────────────────────────────────
   function validate() {
-    if (!buyIn || Number(buyIn) <= 0) {
-      return 'El buy-in debe ser mayor que 0.'
-    }
     if (selectedIds.size < 2) {
       return 'Selecciona al menos 2 jugadores.'
     }
     for (const id of selectedIds) {
+      const p   = allPlayers.find((p) => p.id === id)
+      const bv  = buyInMap[id]
+      if (bv === '' || bv === undefined || isNaN(Number(bv)) || Number(bv) <= 0) {
+        return `El buy-in de ${p?.name ?? 'un jugador'} debe ser mayor que 0.`
+      }
       const val = pointsMap[id]
       if (val === '' || val === undefined || isNaN(Number(val)) || Number(val) < 0) {
-        const p = allPlayers.find((p) => p.id === id)
         return `Introduce los puntos finales de ${p?.name ?? 'un jugador'}.`
       }
     }
@@ -106,17 +116,21 @@ export default function NewGame() {
     try {
       const selectedPlayers = allPlayers
         .filter((p) => selectedIds.has(p.id))
-        .map((p) => ({ ...p, points: Number(pointsMap[p.id]) }))
+        .map((p) => ({
+          ...p,
+          points: Number(pointsMap[p.id]),
+          buyIn:  Number(buyInMap[p.id]),
+        }))
 
-      const result = calculateSettlements(selectedPlayers, Number(buyIn))
+      const result = calculateSettlements(selectedPlayers)
 
       navigate('/resultados', {
         state: {
           result,
           gameData: {
             date:        new Date().toISOString(),
-            buyIn:       Number(buyIn),
-            playersData: result.balances, // [{ id, name, points, finalMoney, net, avatarColor }]
+            buyIn:       Number(buyIn) || Number(buyInMap[selectedPlayers[0]?.id]) || 0,
+            playersData: result.balances, // [{ id, name, points, buyIn, finalMoney, net, avatarColor }]
           },
         },
       })
@@ -140,9 +154,9 @@ export default function NewGame() {
         <h1 className="page-title">Nueva partida</h1>
       </div>
 
-      {/* ── Buy-in ────────────────────────────────────── */}
+      {/* ── Buy-in por defecto ──────────────────────── */}
       <div className="field">
-        <label className="field-label">Buy-in por jugador</label>
+        <label className="field-label">Buy-in por defecto</label>
         <div className="input-wrap">
           <span className="input-prefix">€</span>
           <input
@@ -156,6 +170,9 @@ export default function NewGame() {
             step="0.01"
           />
         </div>
+        <span style={{ fontSize: '.75rem', color: 'var(--text-faint)' }}>
+          Se aplica a los jugadores al seleccionarlos. Puedes cambiarlo individualmente abajo.
+        </span>
       </div>
 
       {/* ── Player chips ──────────────────────────────── */}
@@ -239,29 +256,54 @@ export default function NewGame() {
         )}
       </div>
 
-      {/* ── Points inputs for selected players ────────── */}
+      {/* ── Points + buy-in inputs for selected players ── */}
       {selectedList.length > 0 && (
         <div className="mb-4">
           <div className="section-label mb-3">Fichas finales</div>
           {selectedList.map((player) => (
-            <div key={player.id} className="player-points-row">
+            <div key={player.id} className="player-points-row" style={{ alignItems: 'flex-start' }}>
               <div
                 className="avatar avatar-sm"
-                style={{ background: player.avatar_color, flexShrink: 0 }}
+                style={{ background: player.avatar_color, flexShrink: 0, marginTop: 6 }}
               >
                 {player.name.slice(0, 2).toUpperCase()}
               </div>
-              <span className="player-points-name">{player.name}</span>
-              <input
-                className="input player-points-input"
-                type="number"
-                inputMode="decimal"
-                placeholder="0"
-                value={pointsMap[player.id] ?? ''}
-                onChange={(e) => setPoints(player.id, e.target.value)}
-                min="0"
-                step="0.5"
-              />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--s2)' }}>
+                <span className="player-points-name">{player.name}</span>
+                <div style={{ display: 'flex', gap: 'var(--s2)' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '.68rem', color: 'var(--text-faint)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '.05em' }}>Buy-in</div>
+                    <div className="input-wrap">
+                      <span className="input-prefix" style={{ fontSize: '.85rem' }}>€</span>
+                      <input
+                        className="input"
+                        type="number"
+                        inputMode="decimal"
+                        placeholder={buyIn || '0'}
+                        value={buyInMap[player.id] ?? ''}
+                        onChange={(e) => setPlayerBuyIn(player.id, e.target.value)}
+                        min="0.01"
+                        step="0.01"
+                        style={{ fontSize: '.9rem', padding: '6px 6px 6px 1.8rem', textAlign: 'right' }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '.68rem', color: 'var(--text-faint)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '.05em' }}>Fichas</div>
+                    <input
+                      className="input"
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={pointsMap[player.id] ?? ''}
+                      onChange={(e) => setPoints(player.id, e.target.value)}
+                      min="0"
+                      step="0.5"
+                      style={{ fontSize: '.9rem', padding: '6px', textAlign: 'right', fontWeight: 700 }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>

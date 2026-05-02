@@ -1,10 +1,10 @@
 /**
  * TekaPoker — Settlement Calculator (JavaScript port of the Python backend)
  *
- * calculateSettlements(players, buyIn)
+ * calculateSettlements(players)
  *
- * players = [{ id, name, avatar_color, points }, ...]
- * buyIn   = number (euros each player paid to enter)
+ * players = [{ id, name, avatar_color, points, buyIn }, ...]
+ * buyIn per player allows different buy-in amounts within the same game.
  *
  * Returns { balances, transactions }
  *   balances     — one entry per player with their net gain/loss
@@ -13,7 +13,7 @@
  * Algorithm: greedy matching — biggest debtor always pays biggest creditor
  * first, which minimises the total number of transfers.
  */
-export function calculateSettlements(players, buyIn) {
+export function calculateSettlements(players) {
 
   // ════════════════════════════════════════════════════════════
   // STEP 1 — Total points in play
@@ -23,10 +23,9 @@ export function calculateSettlements(players, buyIn) {
 
   // ════════════════════════════════════════════════════════════
   // STEP 2 — Total money in the pot
-  // buyIn × number of players = the pot everyone is splitting.
+  // Sum each player's individual buy-in amount.
   // ════════════════════════════════════════════════════════════
-  const numPlayers = players.length
-  const totalMoney = buyIn * numPlayers
+  const totalMoney = players.reduce((sum, p) => sum + Number(p.buyIn), 0)
 
   // ════════════════════════════════════════════════════════════
   // STEP 3 — Value of each point in euros
@@ -38,15 +37,18 @@ export function calculateSettlements(players, buyIn) {
   // STEP 4 & 5 — Final money and net gain/loss per player
   // finalMoney = points × valuePerPoint
   // net        = finalMoney − buyIn  (positive = winner, negative = loser)
+  // Each player's individual buyIn is used for their net calculation.
   // ════════════════════════════════════════════════════════════
   const balances = players.map((p) => {
-    const finalMoney = Math.round(Number(p.points) * valuePerPoint * 100) / 100
-    const net        = Math.round((finalMoney - buyIn) * 100) / 100
+    const playerBuyIn = Number(p.buyIn)
+    const finalMoney  = Math.round(Number(p.points) * valuePerPoint * 100) / 100
+    const net         = Math.round((finalMoney - playerBuyIn) * 100) / 100
     return {
       id:          p.id,
       name:        p.name,
       avatarColor: p.avatar_color,
       points:      Number(p.points),
+      buyIn:       playerBuyIn,
       finalMoney,
       net,
     }
