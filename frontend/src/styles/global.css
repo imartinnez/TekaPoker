@@ -1129,3 +1129,208 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Home recent winner card tweak ──────────────────────── */
 .recent-winner { margin-bottom: var(--s3); }
+
+/* ── Home quick-access shortcuts ─────────────────────────── */
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+}
+.home-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  padding: var(--s4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text-2);
+  font-size: .85rem;
+  font-weight: 600;
+  transition: all var(--normal);
+}
+.home-shortcut:hover { background: var(--card-hover); border-color: var(--border-light); color: var(--green); }
+
+/* ── Rebuys between players (NewGame) ────────────────────── */
+.rebuy-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+.rebuy-select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px var(--s2);
+  font-size: .85rem;
+}
+.rebuy-amount { width: 84px; flex-shrink: 0; }
+.rebuy-amount .input { padding: 8px 6px 8px 1.6rem; font-size: .9rem; }
+
+/* ── Chip case page ──────────────────────────────────────── */
+.chip-config-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s1) var(--s2);
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-faint);
+}
+.chip-config-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+.chip-color-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+.chip-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+.chip-color-select {
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  cursor: pointer;
+}
+.chip-num { width: 70px; text-align: right; padding: 8px var(--s2); }
+
+.chip-result-row, .chip-reserve-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s2);
+}
+.chip-result-count {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--green);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ── Analytics page ──────────────────────────────────────── */
+.analytics-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+}
+.analytics-mini {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s2) var(--s3);
+  text-align: center;
+}
+.analytics-mini-val { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.analytics-mini-label { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
+.h2h-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s2);
+}
+
+.table-size-chip {
+  padding: var(--s2) var(--s3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  font-size: .8rem;
+}
+
+/* ── AI analyst box ──────────────────────────────────────── */
+.ai-box {
+  background: linear-gradient(180deg, rgba(251,191,36,.05), transparent);
+  border: 1px solid rgba(251,191,36,.25);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.ai-box-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: .9rem;
+}
+.ai-box-sub { font-size: .72rem; color: var(--text-faint); font-weight: 500; margin-left: auto; }
+
+.ai-chat {
+  padding: var(--s3) var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  max-height: 360px;
+  overflow-y: auto;
+}
+.ai-suggestions { display: flex; flex-direction: column; gap: var(--s2); }
+.ai-suggestion {
+  text-align: left;
+  padding: var(--s2) var(--s3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: .82rem;
+  cursor: pointer;
+  transition: all var(--normal);
+}
+.ai-suggestion:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+
+.ai-msg {
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  font-size: .88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-width: 92%;
+}
+.ai-msg--user {
+  align-self: flex-end;
+  background: var(--green-dark);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.ai-msg--ai {
+  align-self: flex-start;
+  background: var(--surface-2);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+.ai-msg--ai svg { vertical-align: -2px; }
+.ai-msg--error { background: rgba(248,113,113,.12); color: var(--red); }
+
+.ai-input-row {
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border-top: 1px solid var(--border);
+}
+.ai-input-row .input { flex: 1; }

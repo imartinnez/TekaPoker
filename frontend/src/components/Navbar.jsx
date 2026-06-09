@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, PlusCircle, Clock, Trophy, Users, LogOut } from 'lucide-react'
+import { Home, PlusCircle, Clock, Trophy, BarChart3, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
   { to: '/',          icon: Home,       label: 'Inicio'   },
   { to: '/nueva',     icon: PlusCircle, label: 'Nueva'    },
   { to: '/historial', icon: Clock,      label: 'Historial' },
   { to: '/ranking',   icon: Trophy,     label: 'Ranking'  },
-  { to: '/jugadores', icon: Users,      label: 'Jugadores' },
+  { to: '/analisis',  icon: BarChart3,  label: 'Análisis' },
 ]
 
 export default function Navbar() {

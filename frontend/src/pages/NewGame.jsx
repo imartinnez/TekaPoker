@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PlusCircle, Check, AlertCircle } from 'lucide-react'
+import { PlusCircle, Check, AlertCircle, ArrowRight, X } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Toast          from '../components/Toast'
 import { getPlayers, createPlayer } from '../services/database'
@@ -15,6 +15,7 @@ export default function NewGame() {
   const [pointsMap,     setPointsMap]     = useState({})      // { [playerId]: string }
   const [buyInMap,      setBuyInMap]      = useState({})      // { [playerId]: string }
   const [buyIn,         setBuyIn]         = useState('')      // default buy-in
+  const [rebuys,        setRebuys]        = useState([])      // [{ buyerId, sellerId, amount }]
   const [loadingPlayers, setLoadingPlayers] = useState(true)
   const [calculating,   setCalculating]   = useState(false)
   const [error,         setError]         = useState('')
@@ -48,6 +49,8 @@ export default function NewGame() {
         next.delete(id)
         setPointsMap((pm) => { const n = { ...pm }; delete n[id]; return n })
         setBuyInMap((bm) => { const n = { ...bm }; delete n[id]; return n })
+        // Drop any rebuy that involves this player
+        setRebuys((rb) => rb.filter((r) => r.buyerId !== id && r.sellerId !== id))
       } else {
         next.add(id)
         // Pre-fill with current default buy-in
@@ -67,6 +70,20 @@ export default function NewGame() {
   // ── Update a player's individual buy-in ─────────────────
   function setPlayerBuyIn(id, value) {
     setBuyInMap((prev) => ({ ...prev, [id]: value }))
+    setError('')
+  }
+
+  // ── Rebuys between players ──────────────────────────────
+  function addRebuy() {
+    setRebuys((prev) => [...prev, { buyerId: '', sellerId: '', amount: '' }])
+    setError('')
+  }
+  function updateRebuy(index, field, value) {
+    setRebuys((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)))
+    setError('')
+  }
+  function removeRebuy(index) {
+    setRebuys((prev) => prev.filter((_, i) => i !== index))
     setError('')
   }
 
@@ -103,6 +120,17 @@ export default function NewGame() {
         return `Introduce los puntos finales de ${p?.name ?? 'un jugador'}.`
       }
     }
+    for (const r of rebuys) {
+      if (!r.buyerId || !r.sellerId) {
+        return 'Completa el comprador y el vendedor en cada recompra.'
+      }
+      if (r.buyerId === r.sellerId) {
+        return 'En una recompra, comprador y vendedor deben ser distintos.'
+      }
+      if (r.amount === '' || isNaN(Number(r.amount)) || Number(r.amount) <= 0) {
+        return 'El importe de cada recompra debe ser mayor que 0.'
+      }
+    }
     return null
   }
 
@@ -122,7 +150,20 @@ export default function NewGame() {
           buyIn:  Number(buyInMap[p.id]),
         }))
 
-      const result = calculateSettlements(selectedPlayers)
+      const cleanRebuys = rebuys.map((r) => ({
+        buyerId:  r.buyerId,
+        sellerId: r.sellerId,
+        amount:   Number(r.amount),
+      }))
+
+      const result = calculateSettlements(selectedPlayers, cleanRebuys)
+
+      // Attach readable names to each rebuy for the Results screen
+      const rebuysDetailed = cleanRebuys.map((r) => ({
+        ...r,
+        buyerName:  allPlayers.find((p) => p.id === r.buyerId)?.name ?? '',
+        sellerName: allPlayers.find((p) => p.id === r.sellerId)?.name ?? '',
+      }))
 
       navigate('/resultados', {
         state: {
@@ -131,6 +172,7 @@ export default function NewGame() {
             date:        new Date().toISOString(),
             buyIn:       Number(buyIn) || Number(buyInMap[selectedPlayers[0]?.id]) || 0,
             playersData: result.balances, // [{ id, name, points, buyIn, finalMoney, net, avatarColor }]
+            rebuys:      rebuysDetailed,
           },
         },
       })
@@ -306,6 +348,75 @@ export default function NewGame() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Recompras entre jugadores ─────────────────── */}
+      {selectedList.length >= 2 && (
+        <div className="mb-4">
+          <div className="section-label mb-2">Recompras entre jugadores</div>
+          <p style={{ fontSize: '.75rem', color: 'var(--text-faint)', marginBottom: 'var(--s3)' }}>
+            Cuando alguien compra fichas a otro jugador (porque se acabaron las de
+            la caja) y se lo paga al liquidar. No metas aquí las recompras a la
+            caja: esas van como buy-in normal.
+          </p>
+
+          {rebuys.map((r, i) => (
+            <div key={i} className="rebuy-row">
+              <select
+                className="input rebuy-select"
+                value={r.buyerId}
+                onChange={(e) => updateRebuy(i, 'buyerId', e.target.value)}
+              >
+                <option value="">Comprador…</option>
+                {selectedList.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              <ArrowRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+
+              <select
+                className="input rebuy-select"
+                value={r.sellerId}
+                onChange={(e) => updateRebuy(i, 'sellerId', e.target.value)}
+              >
+                <option value="">Vendedor…</option>
+                {selectedList.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              <div className="input-wrap rebuy-amount">
+                <span className="input-prefix" style={{ fontSize: '.85rem' }}>€</span>
+                <input
+                  className="input"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="0"
+                  value={r.amount}
+                  onChange={(e) => updateRebuy(i, 'amount', e.target.value)}
+                  min="0.01"
+                  step="0.01"
+                  style={{ paddingLeft: '1.6rem', textAlign: 'right' }}
+                />
+              </div>
+
+              <button
+                type="button"
+                className="btn-icon btn-ghost"
+                onClick={() => removeRebuy(i)}
+                aria-label="Eliminar recompra"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+
+          <button type="button" className="add-player-btn mt-2" onClick={addRebuy}>
+            <PlusCircle size={16} />
+            Añadir recompra entre jugadores
+          </button>
         </div>
       )}
 

@@ -1,10 +1,22 @@
 /**
  * TekaPoker — Settlement Calculator (JavaScript port of the Python backend)
  *
- * calculateSettlements(players)
+ * calculateSettlements(players, rebuys)
  *
  * players = [{ id, name, avatar_color, points, buyIn }, ...]
  * buyIn per player allows different buy-in amounts within the same game.
+ *
+ * rebuys  = [{ buyerId, sellerId, amount }, ...]  (optional)
+ *   A "recompra entre jugadores": the BUYER bought chips from the SELLER
+ *   for `amount` euros, but did NOT pay in the moment. No new money enters
+ *   the pot (those chips were already in play). The debt is settled at the
+ *   end through the final liquidation.
+ *
+ *   Maths: the pot (for the value-per-point) only uses the bank buy-ins.
+ *   But each player's NET uses an "effective buy-in":
+ *       effectiveBuyIn = buyIn + (chips bought) − (chips sold)
+ *   This keeps the sum of all nets at exactly 0, and the settlement
+ *   automatically nets the inter-player chip debt against the game result.
  *
  * Returns { balances, transactions }
  *   balances     — one entry per player with their net gain/loss
@@ -13,7 +25,7 @@
  * Algorithm: greedy matching — biggest debtor always pays biggest creditor
  * first, which minimises the total number of transfers.
  */
-export function calculateSettlements(players) {
+export function calculateSettlements(players, rebuys = []) {
 
   // ════════════════════════════════════════════════════════════
   // STEP 1 — Total points in play
@@ -23,9 +35,23 @@ export function calculateSettlements(players) {
 
   // ════════════════════════════════════════════════════════════
   // STEP 2 — Total money in the pot
-  // Sum each player's individual buy-in amount.
+  // Sum each player's bank buy-in. Inter-player chip purchases do NOT
+  // add money to the pot (those chips were already bought from the bank).
   // ════════════════════════════════════════════════════════════
   const totalMoney = players.reduce((sum, p) => sum + Number(p.buyIn), 0)
+
+  // ════════════════════════════════════════════════════════════
+  // STEP 2b — Rebuy adjustments per player
+  // buyer's effective buy-in goes UP (they owe for chips received),
+  // seller's effective buy-in goes DOWN (they're owed for chips given).
+  // ════════════════════════════════════════════════════════════
+  const adjustment = {}
+  for (const r of rebuys) {
+    const amt = Number(r.amount)
+    if (!amt || amt <= 0 || !r.buyerId || !r.sellerId) continue
+    adjustment[r.buyerId]  = (adjustment[r.buyerId]  || 0) + amt
+    adjustment[r.sellerId] = (adjustment[r.sellerId] || 0) - amt
+  }
 
   // ════════════════════════════════════════════════════════════
   // STEP 3 — Value of each point in euros
@@ -35,20 +61,24 @@ export function calculateSettlements(players) {
 
   // ════════════════════════════════════════════════════════════
   // STEP 4 & 5 — Final money and net gain/loss per player
-  // finalMoney = points × valuePerPoint
-  // net        = finalMoney − buyIn  (positive = winner, negative = loser)
-  // Each player's individual buyIn is used for their net calculation.
+  // finalMoney    = points × valuePerPoint
+  // effectiveBuyIn = buyIn + rebuy adjustment
+  // net           = finalMoney − effectiveBuyIn
   // ════════════════════════════════════════════════════════════
   const balances = players.map((p) => {
-    const playerBuyIn = Number(p.buyIn)
-    const finalMoney  = Math.round(Number(p.points) * valuePerPoint * 100) / 100
-    const net         = Math.round((finalMoney - playerBuyIn) * 100) / 100
+    const playerBuyIn    = Number(p.buyIn)
+    const adj            = adjustment[p.id] || 0
+    const effectiveBuyIn = Math.round((playerBuyIn + adj) * 100) / 100
+    const finalMoney     = Math.round(Number(p.points) * valuePerPoint * 100) / 100
+    const net            = Math.round((finalMoney - effectiveBuyIn) * 100) / 100
     return {
-      id:          p.id,
-      name:        p.name,
-      avatarColor: p.avatar_color,
-      points:      Number(p.points),
-      buyIn:       playerBuyIn,
+      id:             p.id,
+      name:           p.name,
+      avatarColor:    p.avatar_color,
+      points:         Number(p.points),
+      buyIn:          playerBuyIn,
+      rebuyAdjust:    Math.round(adj * 100) / 100,
+      effectiveBuyIn,
       finalMoney,
       net,
     }

@@ -7,6 +7,8 @@ import History     from './pages/History'
 import Ranking     from './pages/Ranking'
 import Players     from './pages/Players'
 import PlayerStats from './pages/PlayerStats'
+import Analytics   from './pages/Analytics'
+import ChipCase    from './pages/ChipCase'
 import Login       from './pages/Login'
 
 function ProtectedLayout() {
@@ -30,6 +32,8 @@ export default function App() {
         <Route path="/resultados"  element={<Results />}     />
         <Route path="/historial"   element={<History />}     />
         <Route path="/ranking"     element={<Ranking />}     />
+        <Route path="/analisis"    element={<Analytics />}   />
+        <Route path="/caja"        element={<ChipCase />}    />
         <Route path="/jugadores"   element={<Players />}     />
         <Route path="/jugador/:id" element={<PlayerStats />} />
       </Route>

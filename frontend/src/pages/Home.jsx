@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, Users, Layers } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { supabase } from '../services/supabase'
 import { getGlobalRanking } from '../services/database'
@@ -116,10 +116,22 @@ export default function Home() {
       </Link>
 
       {!loading && stats?.totalGames > 0 && (
-        <Link to="/historial" className="btn btn-secondary btn-full mb-6">
+        <Link to="/historial" className="btn btn-secondary btn-full mb-3">
           Ver historial
         </Link>
       )}
+
+      {/* ── Quick access ─────────────────────────────────── */}
+      <div className="home-shortcuts mb-6">
+        <Link to="/jugadores" className="home-shortcut">
+          <Users size={20} />
+          <span>Jugadores</span>
+        </Link>
+        <Link to="/caja" className="home-shortcut">
+          <Layers size={20} />
+          <span>Caja de fichas</span>
+        </Link>
+      </div>
 
       {/* ── Empty state ───────────────────────────────────── */}
       {!loading && stats?.totalGames === 0 && (

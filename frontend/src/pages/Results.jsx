@@ -46,6 +46,7 @@ export default function Results() {
 
   const totalPot = balances.reduce((sum, b) => sum + b.buyIn, 0).toFixed(2)
   const allSameBuyIn = balances.every((b) => b.buyIn === balances[0].buyIn)
+  const rebuys = gameData.rebuys || []
 
   // ── Save to Supabase ──────────────────────────────────────
   async function handleSave() {
@@ -124,6 +125,26 @@ export default function Results() {
           </div>
         )
       })}
+
+      {/* ── Rebuys between players (info) ──────────────── */}
+      {rebuys.length > 0 && (
+        <>
+          <div className="divider-text" style={{ marginTop: 'var(--s6)' }}>
+            Recompras entre jugadores
+          </div>
+          {rebuys.map((r, i) => (
+            <div key={i} className="transaction-row">
+              <span className="tx-from" style={{ color: 'var(--text-2)' }}>{r.buyerName}</span>
+              <span style={{ fontSize: '.75rem', color: 'var(--text-faint)', flexShrink: 0 }}>compró a</span>
+              <span className="tx-to" style={{ color: 'var(--text-2)' }}>{r.sellerName}</span>
+              <span className="tx-amount">€{Number(r.amount).toFixed(2)}</span>
+            </div>
+          ))}
+          <p style={{ fontSize: '.72rem', color: 'var(--text-faint)', marginTop: 'var(--s2)', textAlign: 'center' }}>
+            Ya incluido en la liquidación de abajo.
+          </p>
+        </>
+      )}
 
       {/* ── Settlements ────────────────────────────────── */}
       {transactions.length > 0 ? (

@@ -37,3 +37,6 @@ Thumbs.db
 .env.*.local
 coverage/
 .nyc_output/
+
+# ── Claude Code (worktrees, local state) ─────────────────────
+.claude/
