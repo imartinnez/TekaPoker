@@ -61,6 +61,7 @@ tbody td{padding:9px 14px;vertical-align:top}
 .arch-node{background:var(--gray-l);border:2px solid var(--border);border-radius:10px;padding:12px 28px;font-weight:600;font-size:.9rem;text-align:center;min-width:260px}
 .arch-node.green{background:var(--green-l);border-color:#86efac;color:var(--green)}
 .arch-node.blue{background:var(--blue-l);border-color:#bfdbfe;color:var(--blue)}
+.arch-node.gold{background:var(--gold-l);border-color:#fcd34d;color:var(--gold)}
 .arch-arrow{font-size:1.4rem;color:var(--muted);line-height:1.2}
 .arch-sub{font-size:.75rem;font-weight:400;color:var(--muted);margin-top:2px}
 @media print{body{padding:0;max-width:100%;font-size:11pt}pre{font-size:8pt;break-inside:avoid}h1.section{break-before:page}.cover{break-after:page}.toc{break-after:page}a{color:inherit}}
@@ -73,17 +74,18 @@ tbody td{padding:9px 14px;vertical-align:top}
   <div class="cover-title">Guía Completa de TekaPoker</div>
   <div class="cover-subtitle">Todo el proyecto explicado paso a paso, en español sencillo</div>
   <div style="margin-bottom:20px">
-    <span class="cover-badge">⚛️ React + Vite</span>
-    <span class="cover-badge">🟩 Supabase</span>
-    <span class="cover-badge">▲ Vercel</span>
-    <span class="cover-badge">📱 Mobile-first</span>
+    <span class="cover-badge">React + Vite</span>
+    <span class="cover-badge">Supabase</span>
+    <span class="cover-badge">Vercel</span>
+    <span class="cover-badge">IA con Groq</span>
+    <span class="cover-badge">Móvil-first</span>
   </div>
   <div class="cover-meta">
-    <span>Abril 2026</span>
+    <span>Acceso con contraseña</span>
     <span>·</span>
-    <span>Sin backend propio · Base de datos en la nube</span>
+    <span>Datos en la nube + análisis por IA</span>
     <span>·</span>
-    <span>7 pantallas</span>
+    <span>10 pantallas</span>
   </div>
 </div>
 
@@ -91,16 +93,18 @@ tbody td{padding:9px 14px;vertical-align:top}
   <div class="toc-title">Índice de contenidos</div>
   <ol>
     <li><a href="#s1">¿Qué es TekaPoker y cómo está organizado?</a></li>
-    <li><a href="#s2">La nueva arquitectura: sin backend propio</a></li>
+    <li><a href="#s2">Arquitectura: frontend, Supabase y la función de IA</a></li>
     <li><a href="#s3">La base de datos en Supabase</a></li>
-    <li><a href="#s4">La lógica de cálculo en JavaScript</a></li>
-    <li><a href="#s5">Los servicios: base de datos y cálculo</a></li>
-    <li><a href="#s6">Los componentes reutilizables</a></li>
+    <li><a href="#s4">Acceso con contraseña</a></li>
+    <li><a href="#s5">El cálculo: buy-in por jugador y recompras</a></li>
+    <li><a href="#s6">Los servicios del proyecto</a></li>
     <li><a href="#s7">Las pantallas de la app</a></li>
-    <li><a href="#s8">Cómo poner en marcha el proyecto</a></li>
-    <li><a href="#s9">Cómo desplegar en internet (Vercel)</a></li>
-    <li><a href="#s10">Ejemplo completo: una partida de principio a fin</a></li>
-    <li><a href="#s11">Solución de problemas frecuentes</a></li>
+    <li><a href="#s8">La caja de fichas (por puntos)</a></li>
+    <li><a href="#s9">Analíticas y analista IA</a></li>
+    <li><a href="#s10">Cómo poner en marcha el proyecto</a></li>
+    <li><a href="#s11">Cómo desplegar en internet (Vercel)</a></li>
+    <li><a href="#s12">Ejemplo completo: una partida de principio a fin</a></li>
+    <li><a href="#s13">Solución de problemas frecuentes</a></li>
   </ol>
 </div>
 
@@ -108,101 +112,96 @@ tbody td{padding:9px 14px;vertical-align:top}
 <h1 class="section" id="s1"><span class="num">1</span>¿Qué es TekaPoker y cómo está organizado?</h1>
 
 <p>TekaPoker es una aplicación web que resuelve un problema muy concreto: <strong>al terminar una partida de póker, ¿quién le debe dinero a quién, y cuánto?</strong></p>
-<p>Introduces los puntos finales de cada jugador y el programa te dice exactamente qué transferencias hay que hacer para que todo quede saldado con el mínimo número de pagos posible. Además guarda un historial completo y estadísticas de cada jugador a lo largo del tiempo.</p>
+<p>Introduces lo que ha puesto cada jugador (el buy-in) y las fichas con las que termina, y el programa te dice exactamente qué transferencias hay que hacer para que todo quede saldado con el mínimo número de pagos. Además guarda un historial completo, un ranking, estadísticas de cada jugador y un análisis del grupo con un asistente de IA.</p>
 
 <h2>Estructura de archivos</h2>
 <pre><code>tekapoker/
+├── README.md
+├── guia-tekapoker.html         ← esta guía
 ├── supabase/
 │   └── schema.sql              ← SQL para crear las tablas en Supabase
 └── frontend/
     ├── package.json
     ├── vite.config.js
-    ├── vercel.json             ← Configuración de despliegue en Vercel
+    ├── vercel.json             ← configuración de despliegue en Vercel
     ├── index.html
     ├── .env.example
+    ├── api/
+    │   └── chat.js             ← función serverless del analista IA
     └── src/
         ├── main.jsx
-        ├── App.jsx             ← Rutas de la app (7 pantallas)
+        ├── App.jsx             ← rutas + protección por login
         ├── styles/
         │   └── global.css
         ├── services/
-        │   ├── supabase.js     ← Cliente de conexión a Supabase
-        │   ├── calculator.js   ← Algoritmo de cálculo de pagos
-        │   └── database.js     ← Todas las operaciones con la BD
+        │   ├── supabase.js     ← cliente de conexión a Supabase
+        │   ├── calculator.js   ← cálculo de la liquidación
+        │   ├── database.js     ← operaciones con la base de datos
+        │   ├── analytics.js    ← cálculo de estadísticas del grupo
+        │   ├── chipCase.js     ← reparto de fichas (localStorage)
+        │   └── ai.js           ← cliente del endpoint /api/chat
         ├── components/
         │   ├── Navbar.jsx
         │   ├── Toast.jsx
         │   ├── ConfirmDialog.jsx
         │   └── LoadingSpinner.jsx
         └── pages/
+            ├── Login.jsx       ← pantalla de acceso (contraseña)
             ├── Home.jsx
-            ├── NewGame.jsx
+            ├── NewGame.jsx     ← nueva partida + recompras
             ├── Results.jsx
             ├── History.jsx
             ├── Ranking.jsx
-            ├── Players.jsx     ← Gestión de jugadores registrados
-            └── PlayerStats.jsx ← Estadísticas detalladas por jugador</code></pre>
+            ├── Analytics.jsx   ← analíticas + chat IA
+            ├── ChipCase.jsx    ← caja de fichas
+            ├── Players.jsx
+            └── PlayerStats.jsx</code></pre>
 
 <!-- 2 -->
-<h1 class="section" id="s2"><span class="num">2</span>La nueva arquitectura: sin backend propio</h1>
+<h1 class="section" id="s2"><span class="num">2</span>Arquitectura: frontend, Supabase y la función de IA</h1>
 
-<p>La versión anterior tenía un servidor Python que había que mantener encendido. La nueva versión elimina ese servidor por completo.</p>
+<p>La app no tiene un servidor propio que haya que mantener encendido. El frontend habla directamente con Supabase para todos los datos, y el cálculo de la liquidación ocurre en el propio navegador. La única pieza de servidor es una pequeña función para el chat de IA.</p>
 
 <div class="callout callout--blue">
-  <span class="callout-icon">💡</span>
+  <span class="callout-icon">i</span>
   <div class="callout-body">
-    <div class="callout-title">¿Por qué quitamos el backend Python?</div>
-    <div class="callout-text">El backend hacía dos cosas: calcular los pagos (matemáticas puras, sin necesidad de servidor) y guardar datos (que ahora hace Supabase directamente). Al eliminar esas dos responsabilidades, el backend se vuelve innecesario.</div>
+    <div class="callout-title">¿Por qué una función serverless solo para la IA?</div>
+    <div class="callout-text">La clave de la API de IA es secreta y no puede ir en el navegador (cualquiera podría verla). Por eso el navegador llama a una función propia en Vercel (<code>frontend/api/chat.js</code>), que es la única que conoce la clave y habla con el proveedor de IA. Es la única parte que se ejecuta en un servidor, y solo cuando usas el chat.</div>
   </div>
 </div>
 
-<h2>Comparativa de arquitecturas</h2>
-
-<table>
-  <thead><tr><th>Antes</th><th>Ahora</th></tr></thead>
-  <tbody>
-    <tr><td>React (frontend)</td><td>React (frontend)</td></tr>
-    <tr><td>Python + FastAPI (backend)</td><td><strong>Eliminado</strong></td></tr>
-    <tr><td>Cálculo en Python en el servidor</td><td>Cálculo en JavaScript en el navegador</td></tr>
-    <tr><td>localStorage (datos solo en tu PC)</td><td>Supabase PostgreSQL (datos en la nube)</td></tr>
-    <tr><td>Solo funciona si tu PC está encendido</td><td>Funciona desde cualquier dispositivo, siempre</td></tr>
-    <tr><td>Nadie más puede acceder</td><td>Accesible desde cualquier móvil</td></tr>
-  </tbody>
-</table>
-
-<h2>Arquitectura actual</h2>
+<h2>Las tres piezas</h2>
 
 <div class="arch-box">
-  <div class="arch-node green">Tu móvil o navegador<div class="arch-sub">React en Vercel — gratis para siempre</div></div>
+  <div class="arch-node green">Tu móvil o navegador<div class="arch-sub">React desplegado en Vercel</div></div>
   <div class="arch-arrow">↕</div>
-  <div class="arch-node blue">Supabase<div class="arch-sub">Base de datos PostgreSQL + API automática — gratis</div></div>
+  <div class="arch-node blue">Supabase<div class="arch-sub">Base de datos PostgreSQL — jugadores, partidas, pagos</div></div>
+  <div class="arch-arrow">↕</div>
+  <div class="arch-node gold">Función /api/chat + IA (Groq)<div class="arch-sub">Solo para el analista IA — guarda la clave secreta</div></div>
 </div>
 
-<p>El cálculo de quién paga qué ocurre directamente en el navegador (JavaScript). Solo los datos —jugadores, partidas, estadísticas— van a Supabase.</p>
+<p>El cálculo de quién paga a quién se hace en el navegador con JavaScript (sin red). Los datos van a Supabase. El chat de IA pasa por la función serverless, que añade el contexto y consulta al modelo.</p>
 
 <!-- 3 -->
 <h1 class="section" id="s3"><span class="num">3</span>La base de datos en Supabase</h1>
 
-<p>Supabase es una base de datos PostgreSQL en la nube que además expone automáticamente una API REST. No tienes que escribir ningún servidor: tú defines las tablas y Supabase se encarga del resto.</p>
-
-<h2>Las 4 tablas del proyecto</h2>
+<p>Supabase es una base de datos PostgreSQL en la nube que expone automáticamente una API. Tú defines las tablas y Supabase se encarga del resto. El archivo <span class="filepath">supabase/schema.sql</span> contiene el SQL que hay que ejecutar una vez.</p>
 
 <h3>players — Jugadores registrados</h3>
 <pre><code>CREATE TABLE players (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         TEXT NOT NULL UNIQUE,   <span class="cm">-- nombre único, no puede repetirse</span>
+  name         TEXT NOT NULL UNIQUE,   <span class="cm">-- nombre único</span>
   avatar_color TEXT NOT NULL DEFAULT '#4ade80',
   created_at   TIMESTAMPTZ DEFAULT now()
 );</code></pre>
-<p>Un jugador se registra una sola vez y queda guardado para siempre, a menos que se borre manualmente. El <code>avatar_color</code> es el color del círculo de avatar que se le asigna al crearlo.</p>
 
 <h3>games — Partidas jugadas</h3>
 <pre><code>CREATE TABLE games (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   played_at     TIMESTAMPTZ DEFAULT now(),
-  buy_in        NUMERIC NOT NULL,     <span class="cm">-- lo que pagó cada jugador para entrar</span>
+  buy_in        NUMERIC NOT NULL,
   total_players INTEGER NOT NULL,
-  notes         TEXT                  <span class="cm">-- campo opcional</span>
+  notes         TEXT
 );</code></pre>
 
 <h3>game_players — Resultado de cada jugador en cada partida</h3>
@@ -214,7 +213,6 @@ tbody td{padding:9px 14px;vertical-align:top}
   final_money NUMERIC NOT NULL,
   net         NUMERIC NOT NULL   <span class="cm">-- positivo = ganó, negativo = perdió</span>
 );</code></pre>
-<p><code>ON DELETE CASCADE</code> significa que si borras una partida, se borran automáticamente todas sus filas en esta tabla. No hay que hacer nada extra.</p>
 
 <h3>transactions — Pagos para saldar la partida</h3>
 <pre><code>CREATE TABLE transactions (
@@ -226,63 +224,87 @@ tbody td{padding:9px 14px;vertical-align:top}
 );</code></pre>
 
 <div class="callout callout--gold">
-  <span class="callout-icon">⚠️</span>
+  <span class="callout-icon">!</span>
   <div class="callout-body">
-    <div class="callout-title">Importante: ejecutar el schema.sql en Supabase</div>
-    <div class="callout-text">El archivo <code>supabase/schema.sql</code> del proyecto contiene exactamente este SQL. Tienes que pegarlo en el SQL Editor de Supabase y ejecutarlo una sola vez para crear las tablas. Sin este paso la app no funcionará.</div>
+    <div class="callout-title">El buy-in por jugador y las recompras no necesitan tablas nuevas</div>
+    <div class="callout-text">Aunque cada jugador pueda poner una cantidad distinta y haya recompras entre jugadores, todo queda reflejado en el campo <code>net</code> de <code>game_players</code> y en <code>transactions</code>. Por eso el esquema no cambia.</div>
   </div>
 </div>
 
 <!-- 4 -->
-<h1 class="section" id="s4"><span class="num">4</span>La lógica de cálculo en JavaScript</h1>
+<h1 class="section" id="s4"><span class="num">4</span>Acceso con contraseña</h1>
 
-<p>El algoritmo que antes vivía en Python ahora vive en <span class="filepath">frontend/src/services/calculator.js</span>. La lógica es exactamente la misma, solo cambia el lenguaje.</p>
+<p>La app está protegida por una contraseña sencilla para que no entre cualquiera a modificar los datos. No es seguridad fuerte, solo un candado básico.</p>
 
-<div class="callout callout--gold">
-  <span class="callout-icon">🃏</span>
+<ul style="margin:0 0 16px 20px">
+  <li>La pantalla <span class="filepath">pages/Login.jsx</span> comprueba la contraseña y, si es correcta, guarda una marca de sesión en <code>localStorage</code>.</li>
+  <li>En <span class="filepath">App.jsx</span>, un componente <code>ProtectedLayout</code> redirige a <code>/login</code> si no hay sesión activa.</li>
+  <li>El botón <strong>Salir</strong> de la barra inferior borra la sesión y vuelve al login.</li>
+</ul>
+
+<div class="callout callout--red">
+  <span class="callout-icon">!</span>
   <div class="callout-body">
-    <div class="callout-title">Ejemplo que usaremos</div>
-    <div class="callout-text"><strong>3 jugadores, buy-in €10 (€30 en el bote)</strong><br>Alicia → 120 pts &nbsp;·&nbsp; Bob → 80 pts &nbsp;·&nbsp; Carol → 40 pts</div>
+    <div class="callout-title">La contraseña no se documenta</div>
+    <div class="callout-text">Por motivos obvios, la contraseña concreta no se escribe en esta guía ni en el README. Está definida en el código de la pantalla de login.</div>
   </div>
 </div>
 
-<h3>Paso 1 — Sumar todos los puntos</h3>
-<pre><code><span class="kw">const</span> totalPoints = players.reduce((sum, p) => sum + p.points, <span class="nm">0</span>)
-<span class="cm">// 120 + 80 + 40 = 240</span></code></pre>
-<p><code>reduce()</code> recorre la lista acumulando valores. Empieza en 0 y suma el campo <code>points</code> de cada jugador.</p>
+<!-- 5 -->
+<h1 class="section" id="s5"><span class="num">5</span>El cálculo: buy-in por jugador y recompras</h1>
 
-<h3>Paso 2 — Bote total y valor por punto</h3>
-<pre><code><span class="kw">const</span> totalMoney   = buyIn * players.length   <span class="cm">// €10 × 3 = €30</span>
-<span class="kw">const</span> valuePerPoint = totalMoney / totalPoints  <span class="cm">// €30 / 240 = €0.125 por punto</span></code></pre>
+<p>El cálculo está en <span class="filepath">frontend/src/services/calculator.js</span>. La función recibe la lista de jugadores (cada uno con sus fichas y su buy-in) y, opcionalmente, las recompras entre jugadores.</p>
 
-<h3>Paso 3 — Dinero final y ganancia neta de cada jugador</h3>
+<h3>Paso 1 — Valor de cada ficha</h3>
+<pre><code><span class="kw">const</span> totalPoints = players.reduce((s, p) => s + p.points, <span class="nm">0</span>)
+<span class="kw">const</span> totalMoney  = players.reduce((s, p) => s + p.buyIn,  <span class="nm">0</span>)  <span class="cm">// suma de buy-ins</span>
+<span class="kw">const</span> valuePerPoint = totalMoney / totalPoints</code></pre>
+<p>El bote es la suma de los buy-ins de todos. Como cada jugador lleva su propio <code>buyIn</code>, se admiten cantidades distintas por persona.</p>
+
+<h3>Paso 2 — Dinero final y ganancia neta de cada jugador</h3>
 <pre><code><span class="kw">const</span> balances = players.map(p => {
-  <span class="kw">const</span> finalMoney = p.points * valuePerPoint          <span class="cm">// Alicia: 120 × 0.125 = €15</span>
-  <span class="kw">const</span> net        = Math.round((finalMoney - buyIn) * 100) / 100
-  <span class="cm">// Alicia: €15 − €10 = +€5  |  Bob: €10 − €10 = €0  |  Carol: €5 − €10 = −€5</span>
+  <span class="kw">const</span> finalMoney = p.points * valuePerPoint
+  <span class="kw">const</span> net        = finalMoney - buyInEfectivo(p)   <span class="cm">// ver recompras</span>
   <span class="kw">return</span> { ...p, finalMoney, net }
 })</code></pre>
 
-<h3>Paso 4 — Separar en acreedores y deudores</h3>
-<pre><code><span class="kw">const</span> creditors = balances.filter(p => p.net >  <span class="nm">0.01</span>)   <span class="cm">// los que ganaron</span>
-<span class="kw">const</span> debtors   = balances.filter(p => p.net < -<span class="nm">0.01</span>)   <span class="cm">// los que perdieron</span></code></pre>
+<h3>Paso 3 — Liquidación con el mínimo de pagos</h3>
+<pre><code><span class="cm">// Acreedores (ganan) y deudores (pierden), ordenados de mayor a menor</span>
+<span class="kw">const</span> creditors = balances.filter(p => p.net >  <span class="nm">0.01</span>).sort((a,b) => b.net - a.net)
+<span class="kw">const</span> debtors   = balances.filter(p => p.net < -<span class="nm">0.01</span>).sort((a,b) => a.net - b.net)
 
-<h3>Paso 5 — Algoritmo voraz (greedy): mínimo de transferencias</h3>
-<pre><code><span class="cm">// Ordenar de mayor a menor importe</span>
-creditors.sort((a, b) => b.net - a.net)
-debtors.sort((a, b)   => a.net - b.net)   <span class="cm">// los más negativos primero</span>
-
-<span class="kw">while</span> (creditors hay pendientes && debtors hay pendientes) {
+<span class="cm">// El mayor deudor paga al mayor acreedor; quien llega a 0 avanza al siguiente</span>
+<span class="kw">while</span> (quedan acreedores && quedan deudores) {
   amount = Math.min(creditor.net, Math.abs(debtor.net))
-  transactions.push({ from: debtor.name, to: creditor.name, amount })
-  <span class="cm">// Restar el importe de ambos saldos</span>
-  <span class="cm">// Avanzar al siguiente cuando alguien llega a 0</span>
+  transactions.push({ from: debtor, to: creditor, amount })
 }</code></pre>
 
-<p><strong>Resultado con el ejemplo:</strong> Una sola transferencia — Carol paga €5 a Alicia. Bob queda en €0, no paga ni cobra nada.</p>
+<h2>Recompras entre jugadores</h2>
 
-<!-- 5 -->
-<h1 class="section" id="s5"><span class="num">5</span>Los servicios: base de datos y cálculo</h1>
+<p>A veces un jugador se queda sin fichas y, como ya no quedan en la caja, <strong>le compra fichas a otro jugador</strong> y se lo paga al liquidar (no en el momento). Esto se registra en la pantalla de nueva partida.</p>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">i</span>
+  <div class="callout-body">
+    <div class="callout-title">La idea clave</div>
+    <div class="callout-text">Esas fichas ya estaban en juego, así que <strong>el bote no cambia</strong>. Lo que cambia es el buy-in efectivo: sube el del comprador (debe ese dinero) y baja el del vendedor (ya lo cobró al vender sus fichas).</div>
+  </div>
+</div>
+
+<pre><code>buyInEfectivo = buyIn + (fichas compradas a otros) - (fichas vendidas a otros)</code></pre>
+
+<p>Así la deuda por las fichas se combina automáticamente con el resultado del juego y aparece en los pagos finales, sin pagos aparte. La suma de todos los <code>net</code> sigue siendo exactamente 0.</p>
+
+<div class="callout callout--gold">
+  <span class="callout-icon">♠</span>
+  <div class="callout-body">
+    <div class="callout-title">Ejemplo</div>
+    <div class="callout-text">4 jugadores ponen 10 € cada uno (bote 40 €). A se queda sin fichas y compra 10 € a B. Si A acaba perdiendo y B ganando, la app calcula que <strong>A le paga 5 € a B</strong>, importe que ya combina la compra de fichas con el resultado de la partida.</div>
+  </div>
+</div>
+
+<!-- 6 -->
+<h1 class="section" id="s6"><span class="num">6</span>Los servicios del proyecto</h1>
 
 <h2><span class="filepath">services/supabase.js</span> — La conexión</h2>
 <pre><code><span class="kw">import</span> { createClient } <span class="kw">from</span> <span class="st">'@supabase/supabase-js'</span>
@@ -291,223 +313,252 @@ debtors.sort((a, b)   => a.net - b.net)   <span class="cm">// los más negativos
 <span class="kw">const</span> supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 <span class="kw">export const</span> supabase = createClient(supabaseUrl, supabaseKey)</code></pre>
-<p><code>import.meta.env</code> lee las variables del archivo <code>.env</code>. Las credenciales nunca se escriben directamente en el código.</p>
+<p>Las credenciales se leen del archivo <code>.env</code>, nunca se escriben en el código.</p>
 
-<h2><span class="filepath">services/database.js</span> — Operaciones con la BD</h2>
-<p>Contiene todas las funciones para leer y escribir en Supabase:</p>
+<h2>Resumen de servicios</h2>
+<table>
+  <thead><tr><th>Archivo</th><th>¿Qué hace?</th></tr></thead>
+  <tbody>
+    <tr><td><code>database.js</code></td><td>Todas las operaciones con Supabase: jugadores, partidas, ranking y estadísticas</td></tr>
+    <tr><td><code>calculator.js</code></td><td>Algoritmo de liquidación con buy-in por jugador y recompras (JavaScript puro)</td></tr>
+    <tr><td><code>analytics.js</code></td><td>Calcula las estadísticas del grupo a partir de las partidas (evolución, comparativas, consistencia, rachas)</td></tr>
+    <tr><td><code>chipCase.js</code></td><td>Reparto de fichas por puntos; guarda la configuración en localStorage</td></tr>
+    <tr><td><code>ai.js</code></td><td>Llama al endpoint <code>/api/chat</code> para el analista IA</td></tr>
+  </tbody>
+</table>
 
+<h2>Funciones principales de <span class="filepath">database.js</span></h2>
 <table>
   <thead><tr><th>Función</th><th>¿Qué hace?</th></tr></thead>
   <tbody>
     <tr><td><code>getPlayers()</code></td><td>Devuelve todos los jugadores ordenados por nombre</td></tr>
-    <tr><td><code>createPlayer(name)</code></td><td>Crea un jugador nuevo con color de avatar aleatorio</td></tr>
-    <tr><td><code>deletePlayer(id)</code></td><td>Borra un jugador. Falla con mensaje claro si tiene partidas</td></tr>
+    <tr><td><code>createPlayer(name)</code></td><td>Crea un jugador con color de avatar aleatorio</td></tr>
+    <tr><td><code>deletePlayer(id)</code></td><td>Borra un jugador (falla si tiene partidas)</td></tr>
     <tr><td><code>saveGame(data)</code></td><td>Guarda la partida completa: game + game_players + transactions</td></tr>
     <tr><td><code>getGames()</code></td><td>Todas las partidas con sus jugadores y transacciones</td></tr>
-    <tr><td><code>deleteGame(id)</code></td><td>Borra una partida (el cascade borra el resto automáticamente)</td></tr>
-    <tr><td><code>getPlayerStats(id)</code></td><td>Estadísticas completas de un jugador (ver sección 7)</td></tr>
+    <tr><td><code>deleteGame(id)</code></td><td>Borra una partida (el cascade borra el resto)</td></tr>
+    <tr><td><code>getPlayerStats(id)</code></td><td>Estadísticas completas de un jugador</td></tr>
     <tr><td><code>getGlobalRanking()</code></td><td>Todos los jugadores con stats agregadas, ordenados por ganancia</td></tr>
   </tbody>
 </table>
 
-<!-- 6 -->
-<h1 class="section" id="s6"><span class="num">6</span>Los componentes reutilizables</h1>
-
-<h2><span class="filepath">Navbar.jsx</span> — Barra inferior de navegación</h2>
-<p>Cinco pestañas fijas en la parte inferior de la pantalla: Inicio, Nueva partida, Historial, Ranking, Jugadores. Diseñada para pulgares: botones grandes, siempre visibles. La pestaña activa se ilumina en verde.</p>
-
-<h2><span class="filepath">Toast.jsx</span> — Notificaciones emergentes</h2>
-<p>Mensajes que aparecen brevemente en la parte superior y desaparecen solos. Se usan para confirmar acciones ("Partida guardada ✓") o mostrar errores ("No se puede eliminar este jugador").</p>
-
-<h2><span class="filepath">ConfirmDialog.jsx</span> — Diálogo de confirmación</h2>
-<p>Modal que aparece antes de cualquier acción destructiva (borrar partida, borrar jugador). Requiere confirmación explícita para evitar accidentes.</p>
-
-<h2><span class="filepath">LoadingSpinner.jsx</span> — Indicador de carga</h2>
-<p>Círculo giratorio que aparece mientras se espera respuesta de Supabase.</p>
-
 <!-- 7 -->
 <h1 class="section" id="s7"><span class="num">7</span>Las pantallas de la app</h1>
 
+<p>La barra inferior tiene cinco pestañas: <strong>Inicio, Nueva, Historial, Ranking y Análisis</strong>, más el botón <strong>Salir</strong>. Las pantallas de <strong>Jugadores</strong> y <strong>Caja de fichas</strong> se abren desde accesos directos en Inicio.</p>
+
+<h2>Login</h2>
+<p>Pantalla de acceso con contraseña. Hasta que no se valida, no se puede entrar al resto de la app.</p>
+
 <h2>Inicio (Home)</h2>
-<p>Estadísticas en tiempo real leídas de Supabase: total de partidas, total de jugadores, mayor ganador histórico y última partida jugada. Botón grande de acceso rápido a nueva partida.</p>
+<p>Estadísticas en tiempo real: total de partidas, total de jugadores, mayor ganador y última partida. Botón grande de "Nueva partida" y accesos directos a Jugadores y Caja de fichas.</p>
 
 <h2>Nueva partida (NewGame)</h2>
-<p>Carga los jugadores registrados de Supabase y los muestra como tarjetas seleccionables. Tocar una tarjeta selecciona/deselecciona al jugador. El botón "+ Añadir nuevo jugador" abre un formulario inline que crea el jugador en la BD y lo selecciona automáticamente. Botón "Calcular" fijo en la parte inferior de la pantalla.</p>
+<p>Selección de jugadores como tarjetas. Se indica un <strong>buy-in por defecto</strong> que se aplica al seleccionar a cada jugador, pero se puede <strong>ajustar individualmente</strong>. Cada jugador tiene su campo de buy-in y de fichas finales. Debajo hay una sección de <strong>recompras entre jugadores</strong> (quién compró fichas a quién y por cuánto).</p>
 
 <h2>Resultados (Results)</h2>
-<p>Muestra las ganancias/pérdidas en verde/rojo y la lista de pagos a realizar. Botón "Guardar partida" que escribe en Supabase.</p>
+<p>Muestra el resultado de cada jugador en verde/rojo, las recompras registradas y la lista de pagos para saldar. Botón para guardar la partida en Supabase.</p>
 
 <h2>Historial (History)</h2>
-<p>Lista de partidas guardadas, más reciente primero. Cada tarjeta se puede expandir para ver detalles. Botón de borrar con diálogo de confirmación.</p>
+<p>Lista de partidas guardadas, más reciente primero, cada una expandible. Permite borrar con confirmación.</p>
 
 <h2>Ranking</h2>
-<p>Pódium visual para el top 3 (🥇🥈🥉) y tabla completa ordenada por ganancias totales. Tocar cualquier jugador abre su página de estadísticas.</p>
+<p>Podio para el top 3 y tabla completa ordenada por ganancias. Al tocar un jugador se abren sus estadísticas.</p>
+
+<h2>Análisis (Analytics)</h2>
+<p>Página de analíticas del grupo y chat de IA. Se detalla en la sección 9.</p>
+
+<h2>Caja de fichas (ChipCase)</h2>
+<p>Configuración del set de fichas y reparto por puntos. Se detalla en la sección 8.</p>
 
 <h2>Jugadores (Players)</h2>
-<p>Lista completa de jugadores registrados con fecha de incorporación y color de avatar. Permite añadir nuevos jugadores o borrar los que no tienen partidas asociadas.</p>
+<p>Lista de jugadores registrados. Permite añadir nuevos y borrar los que no tienen partidas.</p>
 
 <h2>Estadísticas de jugador (PlayerStats)</h2>
-<p>La pantalla más completa de la app. Incluye:</p>
 <table>
   <thead><tr><th>Estadística</th><th>Descripción</th></tr></thead>
   <tbody>
-    <tr><td>Partidas jugadas</td><td>Total de partidas en las que ha participado</td></tr>
-    <tr><td>Ganancias totales</td><td>Suma acumulada de todos sus net (puede ser negativa)</td></tr>
-    <tr><td>Win rate</td><td>% de partidas en las que terminó con net positivo</td></tr>
-    <tr><td>Media por partida</td><td>Ganancias totales ÷ partidas jugadas</td></tr>
-    <tr><td>Mejor partida</td><td>Mayor net positivo en una sola noche</td></tr>
-    <tr><td>Peor partida</td><td>Mayor pérdida en una sola noche</td></tr>
-    <tr><td>Racha actual</td><td>🔥 victorias consecutivas o ❄️ derrotas consecutivas</td></tr>
-    <tr><td>Racha máxima</td><td>Mejor racha ganadora de toda su historia</td></tr>
-    <tr><td>Gráfica de evolución</td><td>Línea temporal de ganancias/pérdidas partida a partida</td></tr>
-    <tr><td>Historial completo</td><td>Lista de todas sus partidas con fecha y resultado</td></tr>
+    <tr><td>Partidas jugadas</td><td>Total en las que ha participado</td></tr>
+    <tr><td>Ganancias totales</td><td>Suma de todos sus net (puede ser negativa)</td></tr>
+    <tr><td>Win rate</td><td>% de partidas con net positivo</td></tr>
+    <tr><td>Media por partida</td><td>Ganancias totales ÷ partidas</td></tr>
+    <tr><td>Mejor / peor partida</td><td>Mayor ganancia y mayor pérdida en una noche</td></tr>
+    <tr><td>Racha actual / máxima</td><td>Victorias o derrotas consecutivas</td></tr>
+    <tr><td>Gráfica de evolución</td><td>Ganancias/pérdidas partida a partida</td></tr>
+    <tr><td>Historial completo</td><td>Todas sus partidas con fecha y resultado</td></tr>
   </tbody>
 </table>
 
 <!-- 8 -->
-<h1 class="section" id="s8"><span class="num">8</span>Cómo poner en marcha el proyecto</h1>
+<h1 class="section" id="s8"><span class="num">8</span>La caja de fichas (por puntos)</h1>
+
+<p>Esta pantalla ayuda a repartir las fichas físicas. Importante: <strong>las fichas valen puntos, no euros</strong>.</p>
+
+<div class="callout callout--blue">
+  <span class="callout-icon">i</span>
+  <div class="callout-body">
+    <div class="callout-title">Cómo funciona</div>
+    <div class="callout-text">Cada color tiene un valor en puntos (por defecto blanca 1, roja 2, verde 5, azul 10, negra 20), editable porque a veces cambiamos el valor de algún color. Las fichas se reparten a partes iguales entre los jugadores, y el buy-in determina cuánto vale cada punto.</div>
+  </div>
+</div>
+
+<pre><code>fichasPorJugador = floor(cantidad / nºJugadores)   <span class="cm">// para cada color</span>
+puntosPorJugador = suma de (fichasPorJugador × valorEnPuntos)
+valorPorPunto    = buyIn / puntosPorJugador          <span class="cm">// en euros</span></code></pre>
+
+<p>Como todos arrancan con el mismo stack de puntos, el valor de un stack completo siempre equivale al buy-in. La pantalla muestra los puntos por jugador, el valor por punto, el reparto por color y la <strong>reserva</strong> que queda en la caja (útil para recompras). La configuración se guarda en el navegador (localStorage), así que se ajusta una vez por dispositivo.</p>
+
+<!-- 9 -->
+<h1 class="section" id="s9"><span class="num">9</span>Analíticas y analista IA</h1>
+
+<h2>Analíticas del grupo</h2>
+<p>A partir de todas las partidas, <span class="filepath">services/analytics.js</span> calcula:</p>
+<table>
+  <thead><tr><th>Sección</th><th>Qué muestra</th></tr></thead>
+  <tbody>
+    <tr><td>Evolución del dinero acumulado</td><td>Gráfica de líneas con el acumulado de cada jugador; al elegir un jugador, su línea se resalta</td></tr>
+    <tr><td>Comparador de jugadores</td><td>Gráfica de barras que compara a todos en la métrica elegida (neto total, media, win-rate, volatilidad o partidas)</td></tr>
+    <tr><td>Consistencia</td><td>Ranking por volatilidad: menor variación = resultados más estables</td></tr>
+    <tr><td>Tendencia / racha</td><td>Si un jugador está en alza, en baja o estable según sus últimas partidas</td></tr>
+    <tr><td>Partidas por nº de jugadores</td><td>Cuántas partidas se jugaron con cada número de jugadores en mesa</td></tr>
+  </tbody>
+</table>
+
+<h2>El analista IA</h2>
+<p>Un chat donde puedes preguntar en lenguaje natural sobre los datos del grupo. El selector "¿Quién eres?" personaliza las respuestas desde la perspectiva de un jugador.</p>
+
+<div class="callout callout--green">
+  <span class="callout-icon">✓</span>
+  <div class="callout-body">
+    <div class="callout-title">Por qué no se inventa los datos</div>
+    <div class="callout-text">Funciona como un RAG sencillo: el frontend calcula un resumen estructurado de las estadísticas reales y se lo envía al modelo como contexto. Las instrucciones obligan a usar solo esos datos, a decir "No tengo ese dato registrado" cuando algo no está, y a no inventar cifras. Se ejecuta con temperatura baja para respuestas estables.</div>
+  </div>
+</div>
+
+<h3>Flujo del chat</h3>
+<pre><code>Analytics.jsx → services/ai.js → POST /api/chat → API de IA (Groq) → respuesta</code></pre>
+<p>La función <span class="filepath">frontend/api/chat.js</span> es la única que conoce la clave de la IA (variable de entorno del servidor). El navegador nunca la ve.</p>
+
+<div class="callout callout--gold">
+  <span class="callout-icon">!</span>
+  <div class="callout-body">
+    <div class="callout-title">En local el chat no responde</div>
+    <div class="callout-text">La función serverless solo se ejecuta en Vercel (o con <code>vercel dev</code>). Con <code>npm run dev</code> el resto de la app funciona, pero el chat de IA solo responde una vez desplegado.</div>
+  </div>
+</div>
+
+<!-- 10 -->
+<h1 class="section" id="s10"><span class="num">10</span>Cómo poner en marcha el proyecto</h1>
 
 <h2>PARTE 1 — Crear la base de datos en Supabase</h2>
 <ol class="steps">
   <li>Ve a <strong>supabase.com</strong> y crea una cuenta gratuita.</li>
-  <li>Haz clic en <strong>"New project"</strong>. Nombre: <code>tekapoker</code>. Elige región West EU. Espera ~2 minutos.</li>
-  <li>En el menú lateral ve a <strong>SQL Editor → New query</strong>.</li>
-  <li>Copia el contenido de <span class="filepath">supabase/schema.sql</span> y pégalo. Haz clic en <strong>Run</strong>. Deberías ver "Success".</li>
+  <li>Crea un <strong>New project</strong>. Nombre: <code>tekapoker</code>. Elige región de Europa. Espera ~2 minutos.</li>
+  <li>Ve a <strong>SQL Editor → New query</strong>.</li>
+  <li>Copia el contenido de <span class="filepath">supabase/schema.sql</span>, pégalo y pulsa <strong>Run</strong>.</li>
   <li>Ve a <strong>Project Settings → API</strong> y copia el <strong>Project URL</strong> y la <strong>anon/public key</strong>.</li>
 </ol>
 
 <h2>PARTE 2 — Configurar las credenciales en local</h2>
-<p>Crea el archivo <span class="filepath">frontend/.env</span> (copia de <code>.env.example</code>) con tus valores:</p>
+<p>Crea el archivo <span class="filepath">frontend/.env</span> (copia de <code>.env.example</code>):</p>
 <pre><code>VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...</code></pre>
 
 <div class="callout callout--red">
-  <span class="callout-icon">⚠️</span>
+  <span class="callout-icon">!</span>
   <div class="callout-body">
     <div class="callout-title">El archivo .env nunca debe subirse a GitHub</div>
-    <div class="callout-text">Contiene credenciales de acceso a tu base de datos. Ya está incluido en el <code>.gitignore</code> para evitar subirlo por accidente.</div>
+    <div class="callout-text">Contiene credenciales. Ya está en el <code>.gitignore</code> para evitar subirlo por accidente.</div>
   </div>
 </div>
 
 <h2>PARTE 3 — Arrancar en local</h2>
-<p>Solo necesitas <strong>un terminal</strong> (ya no hay backend que arrancar por separado):</p>
 <pre><code>cd frontend
 npm install      <span class="cm"># solo la primera vez</span>
-npm run dev      <span class="cm"># arranca en http://localhost:5173</span></code></pre>
+npm run dev      <span class="cm"># http://localhost:5173</span></code></pre>
 
-<!-- 9 -->
-<h1 class="section" id="s9"><span class="num">9</span>Cómo desplegar en internet (Vercel)</h1>
-
-<p>Una vez desplegada, la app funciona 24/7 desde cualquier móvil sin que tu ordenador esté encendido.</p>
+<!-- 11 -->
+<h1 class="section" id="s11"><span class="num">11</span>Cómo desplegar en internet (Vercel)</h1>
 
 <h2>PARTE 1 — Subir el código a GitHub</h2>
-<pre><code>git add .
-git commit -m "Migrate to Supabase"
+<pre><code>git add -A
+git commit -m "Actualización"
 git push origin main</code></pre>
 
 <h2>PARTE 2 — Conectar con Vercel</h2>
 <ol class="steps">
   <li>Ve a <strong>vercel.com</strong> y entra con tu cuenta de GitHub.</li>
-  <li>Haz clic en <strong>"Add New Project"</strong> e importa el repositorio <code>tekapoker</code>.</li>
-  <li>Configura <strong>Root Directory</strong> como <code>frontend</code> (muy importante).</li>
-  <li>En <strong>Environment Variables</strong> añade las dos variables de Supabase:<br>
-    <code>VITE_SUPABASE_URL</code> y <code>VITE_SUPABASE_ANON_KEY</code></li>
-  <li>Haz clic en <strong>Deploy</strong>. En 1-2 minutos tendrás una URL pública.</li>
+  <li>Importa el repositorio <code>TekaPoker</code>.</li>
+  <li>Configura <strong>Root Directory</strong> como <code>frontend</code> (muy importante; también permite que se despliegue la carpeta <code>api/</code>).</li>
+  <li>En <strong>Environment Variables</strong> añade las de Supabase (<code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code>) y, para el chat, <code>GROQ_API_KEY</code> (la clave de IA se obtiene en console.groq.com).</li>
+  <li>Pulsa <strong>Deploy</strong>. En 1-2 minutos tendrás una URL pública.</li>
 </ol>
 
 <div class="callout callout--green">
-  <span class="callout-icon">📱</span>
+  <span class="callout-icon">+</span>
   <div class="callout-body">
     <div class="callout-title">Añadir a la pantalla de inicio del móvil</div>
-    <div class="callout-text">En Safari (iPhone): compartir → "Añadir a pantalla de inicio".<br>En Chrome (Android): menú → "Añadir a pantalla de inicio".<br>Funcionará como una app nativa, sin barra del navegador.</div>
+    <div class="callout-text">En Safari (iPhone): compartir → "Añadir a pantalla de inicio". En Chrome (Android): menú → "Añadir a pantalla de inicio". Funcionará como una app, sin barra del navegador.</div>
   </div>
 </div>
 
-<h2>Flujo de datos en producción</h2>
-<div class="flow">
-<span class="col-header">MÓVIL                   VERCEL (Frontend)              SUPABASE</span>
-  │                            │                                │
-  │  Abre la URL ─────────────▶│                                │
-  │◀─── carga la app (React) ──│                                │
-  │                            │                                │
-  │  Selecciona jugadores       │                                │
-  │  Pulsa Calcular ───────────▶│ calculateSettlements() en JS   │
-  │◀─── resultados al instante ─│ (sin petición de red)          │
-  │                            │                                │
-  │  Pulsa Guardar ────────────▶│─── <span class="arrow">INSERT en Supabase</span> ──────▶│
-  │                            │◀── <span class="arrow">confirmación</span> ────────────│
-  │◀─── toast "Guardado ✓" ────│                                │
+<div class="callout callout--gold">
+  <span class="callout-icon">!</span>
+  <div class="callout-body">
+    <div class="callout-title">La clave de IA solo se configura en Vercel</div>
+    <div class="callout-text"><code>GROQ_API_KEY</code> es secreta y se usa solo en el servidor. No se escribe en el código ni en esta guía.</div>
+  </div>
 </div>
 
-<!-- 10 -->
-<h1 class="section" id="s10"><span class="num">10</span>Ejemplo completo: una partida de principio a fin</h1>
+<!-- 12 -->
+<h1 class="section" id="s12"><span class="num">12</span>Ejemplo completo: una partida de principio a fin</h1>
 
 <div class="callout callout--gold">
-  <span class="callout-icon">🃏</span>
+  <span class="callout-icon">♣</span>
   <div class="callout-body">
     <div class="callout-title">Escenario</div>
-    <div class="callout-text"><strong>3 amigos, buy-in €10 (€30 en el bote)</strong><br>Alicia → 150 pts · Bob → 90 pts · Carol → 60 pts</div>
+    <div class="callout-text"><strong>3 amigos, buy-in 10 € cada uno (30 € en el bote)</strong><br>Alicia → 150 pts · Bob → 90 pts · Carol → 60 pts</div>
   </div>
 </div>
 
 <ol class="steps">
-  <li><strong>Abre la app</strong> desde el móvil. La pantalla de inicio muestra las estadísticas acumuladas.</li>
-  <li><strong>Pulsa "Nueva partida"</strong>. Aparecen los jugadores ya registrados como tarjetas.</li>
-  <li><strong>Selecciona a Alicia, Bob y Carol</strong> tocando sus tarjetas. Quedan marcadas con un borde verde.</li>
-  <li><strong>Escribe el buy-in: 10</strong> e introduce los puntos de cada uno.</li>
-  <li><strong>Pulsa "Calcular"</strong>. El resultado aparece al instante — sin llamada al servidor.<br>
+  <li><strong>Entra con la contraseña</strong> y abre la app desde el móvil.</li>
+  <li><strong>Pulsa "Nueva partida"</strong>. Aparecen los jugadores registrados.</li>
+  <li><strong>Selecciona a Alicia, Bob y Carol</strong>. Quedan marcadas con borde verde.</li>
+  <li><strong>Pon el buy-in por defecto (10)</strong>. Ajusta el de algún jugador si puso más, y registra las recompras entre jugadores si las hubo.</li>
+  <li><strong>Introduce las fichas finales</strong> de cada uno y pulsa "Calcular":
     <table style="margin-top:8px">
       <thead><tr><th>Jugador</th><th>Puntos</th><th>Dinero final</th><th>Net</th></tr></thead>
       <tbody>
-        <tr><td>Alicia</td><td>150</td><td>€15,00</td><td style="color:var(--green)"><strong>+€5,00</strong></td></tr>
-        <tr><td>Bob</td><td>90</td><td>€9,00</td><td style="color:var(--red)"><strong>−€1,00</strong></td></tr>
-        <tr><td>Carol</td><td>60</td><td>€6,00</td><td style="color:var(--red)"><strong>−€4,00</strong></td></tr>
+        <tr><td>Alicia</td><td>150</td><td>15,00 €</td><td style="color:var(--green)"><strong>+5,00 €</strong></td></tr>
+        <tr><td>Bob</td><td>90</td><td>9,00 €</td><td style="color:var(--red)"><strong>−1,00 €</strong></td></tr>
+        <tr><td>Carol</td><td>60</td><td>6,00 €</td><td style="color:var(--red)"><strong>−4,00 €</strong></td></tr>
       </tbody>
     </table>
-    Pagos: Carol → Alicia €4,00 · Bob → Alicia €1,00
+    Pagos: Carol → Alicia 4,00 € · Bob → Alicia 1,00 €
   </li>
-  <li><strong>Pulsa "Guardar partida"</strong>. Los datos se escriben en Supabase. Aparece un toast de confirmación.</li>
-  <li><strong>Ve a Historial</strong>. La partida aparece en la lista. Expándela para ver los detalles.</li>
-  <li><strong>Ve a Ranking</strong>. Alicia encabeza la clasificación con +€5,00. Toca su nombre para ver sus estadísticas detalladas con la gráfica de evolución.</li>
+  <li><strong>Pulsa "Guardar partida"</strong>. Se escribe en Supabase.</li>
+  <li><strong>Ve a Historial</strong> para ver la partida, a <strong>Ranking</strong> para la clasificación, y a <strong>Análisis</strong> para las gráficas del grupo y preguntar al analista IA.</li>
 </ol>
 
-<!-- 11 -->
-<h1 class="section" id="s11"><span class="num">11</span>Solución de problemas frecuentes</h1>
+<!-- 13 -->
+<h1 class="section" id="s13"><span class="num">13</span>Solución de problemas frecuentes</h1>
 
 <table>
   <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
   <tbody>
-    <tr><td>La app carga pero no muestra datos</td><td>Variables de entorno mal configuradas</td><td>Comprueba <code>VITE_SUPABASE_URL</code> y <code>VITE_SUPABASE_ANON_KEY</code> en Vercel (sin espacios extra)</td></tr>
-    <tr><td>"relation does not exist" en consola</td><td>El schema.sql no se ejecutó</td><td>Ve al SQL Editor de Supabase y ejecuta el schema.sql de nuevo</td></tr>
-    <tr><td>En local no conecta con Supabase</td><td>Falta el archivo .env</td><td>Comprueba que existe <code>frontend/.env</code> (no <code>.env.example</code>) con los valores correctos</td></tr>
-    <tr><td>"No se puede eliminar un jugador"</td><td>El jugador tiene partidas registradas</td><td>Es el comportamiento correcto. Para preservar el historial, solo se pueden borrar jugadores sin partidas.</td></tr>
-    <tr><td>La URL de Vercel devuelve 404 al navegar</td><td>Falta el vercel.json</td><td>Comprueba que existe <code>frontend/vercel.json</code> con la regla de rewrite</td></tr>
-    <tr><td>Los cambios no se ven en Vercel tras el push</td><td>El despliegue automático puede tardar</td><td>Espera 1-2 minutos o ve al dashboard de Vercel para ver el estado del deploy</td></tr>
-  </tbody>
-</table>
-
-<hr class="divider"/>
-
-<table>
-  <thead><tr><th>Archivo</th><th>¿Qué hace?</th></tr></thead>
-  <tbody>
-    <tr><td><code>supabase/schema.sql</code></td><td>Define las 4 tablas de la base de datos</td></tr>
-    <tr><td><code>services/supabase.js</code></td><td>Abre la conexión con Supabase usando las credenciales del .env</td></tr>
-    <tr><td><code>services/calculator.js</code></td><td>Algoritmo greedy de liquidación — JavaScript puro, sin red</td></tr>
-    <tr><td><code>services/database.js</code></td><td>Todas las operaciones con la BD: jugadores, partidas, estadísticas</td></tr>
-    <tr><td><code>pages/NewGame.jsx</code></td><td>Selección de jugadores existentes + cálculo local</td></tr>
-    <tr><td><code>pages/Results.jsx</code></td><td>Muestra resultados y guarda en Supabase</td></tr>
-    <tr><td><code>pages/History.jsx</code></td><td>Historial de partidas con opción de borrar</td></tr>
-    <tr><td><code>pages/Ranking.jsx</code></td><td>Clasificación global con pódium</td></tr>
-    <tr><td><code>pages/Players.jsx</code></td><td>Gestión de jugadores registrados</td></tr>
-    <tr><td><code>pages/PlayerStats.jsx</code></td><td>Estadísticas detalladas + gráfica de evolución</td></tr>
-    <tr><td><code>vercel.json</code></td><td>Le dice a Vercel que todas las rutas apuntan al index.html</td></tr>
+    <tr><td>La app carga pero no muestra datos</td><td>Variables de entorno mal configuradas</td><td>Comprueba <code>VITE_SUPABASE_URL</code> y <code>VITE_SUPABASE_ANON_KEY</code> en Vercel</td></tr>
+    <tr><td>"relation does not exist" en consola</td><td>El schema.sql no se ejecutó</td><td>Ejecuta <code>supabase/schema.sql</code> en el SQL Editor de Supabase</td></tr>
+    <tr><td>El chat IA no responde</td><td>Falta <code>GROQ_API_KEY</code> en Vercel, o estás en local</td><td>Añade la variable en Vercel y vuelve a desplegar; en local el chat no funciona</td></tr>
+    <tr><td>"No se puede eliminar un jugador"</td><td>El jugador tiene partidas registradas</td><td>Es el comportamiento correcto, para preservar el historial</td></tr>
+    <tr><td>La URL de Vercel da 404 al navegar</td><td>Falta o está mal el vercel.json</td><td>Comprueba <code>frontend/vercel.json</code> (debe excluir <code>/api/</code> del rewrite)</td></tr>
+    <tr><td>Los cambios no se ven tras el push</td><td>El despliegue tarda</td><td>Espera 1-2 minutos o mira el estado en el dashboard de Vercel</td></tr>
   </tbody>
 </table>
 
 <div style="text-align:center;margin-top:60px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem">
   <div style="font-size:1.4rem;margin-bottom:8px">♠ ♥ ♦ ♣</div>
-  Guía del proyecto <strong>TekaPoker</strong> · Abril 2026 · React + Supabase + Vercel
+  Guía del proyecto <strong>TekaPoker</strong> · React + Supabase + Vercel + IA
 </div>
 
 </body>
