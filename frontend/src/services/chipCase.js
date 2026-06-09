@@ -1,8 +1,16 @@
 /**
  * TekaPoker — Chip Case helper.
  *
- * Stores your physical chip set (colours, value, quantity) in localStorage
- * and computes how to split the chips between players for a given buy-in.
+ * Stores your physical chip set in localStorage. Each chip colour has a
+ * value in POINTS (not euros) — e.g. blanca=1, roja=2, verde=5, azul=10,
+ * negra=20 by default, editable per game.
+ *
+ * The chips are split EQUALLY between players (everyone gets the same
+ * stack). The buy-in then sets how much each point is worth in euros:
+ *
+ *     valorPorPunto (€) = buyIn / puntosPorJugador
+ *
+ * So the monetary value of a full starting stack always equals the buy-in.
  *
  * No database, no cost — purely local to the device/browser.
  */
@@ -10,11 +18,11 @@
 const STORAGE_KEY = 'tekapoker_chipcase'
 
 const DEFAULT_CHIPS = [
-  { id: 'w', label: 'Blanca', color: '#e5e7eb', value: 0.05, count: 100 },
-  { id: 'r', label: 'Roja',   color: '#f87171', value: 0.10, count: 100 },
-  { id: 'b', label: 'Azul',   color: '#60a5fa', value: 0.25, count: 100 },
-  { id: 'g', label: 'Verde',  color: '#4ade80', value: 0.50, count: 50  },
-  { id: 'k', label: 'Negra',  color: '#1f2937', value: 1.00, count: 50  },
+  { id: 'w', label: 'Blanca', color: '#e5e7eb', value: 1  , count: 100 },
+  { id: 'r', label: 'Roja',   color: '#f87171', value: 2  , count: 100 },
+  { id: 'g', label: 'Verde',  color: '#4ade80', value: 5  , count: 100 },
+  { id: 'b', label: 'Azul',   color: '#60a5fa', value: 10 , count: 50  },
+  { id: 'k', label: 'Negra',  color: '#1f2937', value: 20 , count: 50  },
 ]
 
 export function loadChipCase() {
@@ -41,81 +49,61 @@ export function newChipId() {
 }
 
 /**
- * Split chips between `players` for a per-player buy-in of `buyIn` euros.
+ * Split the chip case equally between `players` and work out the money
+ * value of each point from the `buyIn`.
  *
- * Strategy: largest-denomination-first greedy. This uses the FEWEST chips
- * per player, which leaves the biggest reserve in the box — exactly what
- * you want so you don't run out when someone rebuys mid-game.
+ * Strategy: each player receives the same number of every colour —
+ * floor(cantidad / jugadores) — leaving the remainder as reserve in the
+ * box (handy for rebuys). The starting stack (in points) is the same for
+ * everyone, so valorPorPunto = buyIn / puntosPorJugador.
  *
  * @returns {{
  *   ok: boolean,
- *   exact: boolean,
  *   reason?: string,
- *   stack: Array,        // [{ id,label,color,value, perPlayer }]
- *   stackValue: number,  // euros per player actually allocated
- *   reserves: Array,     // [{ id,label,color, used, remaining }]
+ *   rows: Array,           // [{ id,label,color,value, perPlayer, points, reserve }]
+ *   pointsPerPlayer: number,
+ *   valuePerPoint: number, // euros per point
+ *   stackValue: number,    // euros per player (== buyIn)
  * }}
  */
 export function distributeChips(chips, buyIn, players) {
   const P = Math.floor(Number(players))
-  const target = Math.round(Number(buyIn) * 100) // work in cents
+  const buy = Number(buyIn)
 
   if (!P || P < 1) return { ok: false, reason: 'players' }
-  if (!target || target <= 0) return { ok: false, reason: 'buyin' }
+  if (!buy || buy <= 0) return { ok: false, reason: 'buyin' }
 
-  const denoms = (chips || [])
-    .map((c) => ({
-      ...c,
-      vc: Math.round(Number(c.value) * 100),
-      maxPer: Math.floor(Number(c.count) / P),
-    }))
-    .filter((c) => c.vc > 0 && c.count > 0)
-    .sort((a, b) => b.vc - a.vc) // largest first
+  const valid = (chips || []).filter(
+    (c) => Number(c.value) > 0 && Number(c.count) > 0
+  )
+  if (valid.length === 0) return { ok: false, reason: 'config' }
 
-  if (denoms.length === 0) return { ok: false, reason: 'config' }
-
-  let remaining = target
-  const perPlayer = {}
-  for (const d of denoms) {
-    const want = Math.floor(remaining / d.vc)
-    const give = Math.min(want, d.maxPer)
-    perPlayer[d.id] = give
-    remaining -= give * d.vc
-  }
-
-  const exact = remaining === 0
-  const stackValueCents = target - remaining
-
-  const stack = denoms
-    .map((d) => ({
-      id: d.id,
-      label: d.label,
-      color: d.color,
-      value: d.value,
-      perPlayer: perPlayer[d.id] || 0,
-    }))
-    .sort((a, b) => a.value - b.value) // show small → large for readability
-
-  const reserves = denoms
-    .map((d) => {
-      const used = (perPlayer[d.id] || 0) * P
+  const rows = valid
+    .map((c) => {
+      const perPlayer = Math.floor(Number(c.count) / P)
+      const points = perPlayer * Number(c.value)
+      const reserve = Number(c.count) - perPlayer * P
       return {
-        id: d.id,
-        label: d.label,
-        color: d.color,
-        value: d.value,
-        used,
-        remaining: Number(d.count) - used,
+        id: c.id,
+        label: c.label,
+        color: c.color,
+        value: Number(c.value),
+        perPlayer,
+        points,
+        reserve,
       }
     })
     .sort((a, b) => a.value - b.value)
 
+  const pointsPerPlayer = rows.reduce((s, r) => s + r.points, 0)
+  const valuePerPoint = pointsPerPlayer > 0 ? buy / pointsPerPlayer : 0
+
   return {
     ok: true,
-    exact,
-    stack,
-    stackValue: stackValueCents / 100,
-    shortfall: remaining / 100, // euros that couldn't be matched (0 if exact)
-    reserves,
+    rows,
+    pointsPerPlayer,
+    valuePerPoint,
+    stackValue: buy,
+    enoughChips: pointsPerPlayer > 0,
   }
 }

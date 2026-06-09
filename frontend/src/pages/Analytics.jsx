@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ReferenceLine, ResponsiveContainer, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
+  ResponsiveContainer, BarChart, Bar, Cell,
 } from 'recharts'
-import { Sparkles, Send, TrendingUp, TrendingDown, Minus, Swords } from 'lucide-react'
+import { Sparkles, Send, TrendingUp, TrendingDown, Minus, BarChart2 } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Toast          from '../components/Toast'
 import { getGames }   from '../services/database'
-import { buildAnalytics, headToHeadFor, buildAiPayload } from '../services/analytics'
+import { buildAnalytics, buildAiPayload } from '../services/analytics'
 import { askAI }      from '../services/ai'
 
 const fmtNet = (n) => `${n > 0 ? '+' : n < 0 ? '−' : ''}€${Math.abs(n).toFixed(2)}`
@@ -19,22 +19,31 @@ const SUGGESTIONS = [
   '¿Estoy en racha últimamente?',
 ]
 
+// Metrics available in the comparator
+const METRICS = [
+  { key: 'totalNet',   label: 'Neto total (€)',        fmt: (v) => fmtNet(v),            signed: true },
+  { key: 'avgNet',     label: 'Media por partida (€)', fmt: (v) => fmtNet(v),            signed: true },
+  { key: 'winRate',    label: 'Win-rate (%)',          fmt: (v) => `${v}%`,              signed: false },
+  { key: 'volatility', label: 'Volatilidad (€)',       fmt: (v) => `±€${v.toFixed(2)}`,  signed: false },
+  { key: 'games',      label: 'Partidas jugadas',      fmt: (v) => `${v}`,               signed: false },
+]
+
 export default function Analytics() {
   const [games,    setGames]    = useState([])
   const [loading,  setLoading]  = useState(true)
   const [toast,    setToast]    = useState(null)
   const [viewerId, setViewerId] = useState('')
+  const [metric,   setMetric]   = useState('totalNet')
 
   // AI chat
-  const [question,   setQuestion]   = useState('')
-  const [chat,       setChat]       = useState([]) // [{ role, text }]
-  const [asking,     setAsking]     = useState(false)
+  const [question, setQuestion] = useState('')
+  const [chat,     setChat]     = useState([])
+  const [asking,   setAsking]   = useState(false)
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await getGames()
-        setGames(data)
+        setGames(await getGames())
       } catch (err) {
         setToast({ message: err.message, type: 'error' })
       } finally {
@@ -46,9 +55,6 @@ export default function Analytics() {
 
   const analytics = useMemo(() => buildAnalytics(games), [games])
   const viewer = analytics.players.find((p) => p.id === viewerId) || null
-  const h2h = viewerId ? headToHeadFor(analytics, viewerId) : []
-
-  // Build aligned cumulative chart data across all games
   const chartData = useMemo(() => buildCumulativeSeries(games), [games])
 
   async function handleAsk(q) {
@@ -94,7 +100,13 @@ export default function Analytics() {
 
   const players = analytics.players
   const mostConsistent = [...players].filter((p) => p.games >= 2).sort((a, b) => a.volatility - b.volatility)
-  const colorById = Object.fromEntries(players.map((p) => [p.id, p.avatarColor]))
+
+  // Comparator data for the selected metric
+  const metricDef = METRICS.find((m) => m.key === metric)
+  const comparatorData = [...players]
+    .map((p) => ({ name: p.name, value: p[metric], color: p.avatarColor, id: p.id }))
+    .sort((a, b) => b.value - a.value)
+  const comparatorHeight = Math.max(140, comparatorData.length * 38 + 24)
 
   return (
     <div className="page">
@@ -104,7 +116,7 @@ export default function Analytics() {
 
       {/* ── Perspective selector ───────────────────────── */}
       <div className="field">
-        <label className="field-label">¿Quién eres? (para personalizar el análisis y el chat)</label>
+        <label className="field-label">¿Quién eres? (personaliza el análisis y el chat)</label>
         <select className="input" value={viewerId} onChange={(e) => setViewerId(e.target.value)}>
           <option value="">— Vista del grupo —</option>
           {players.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -127,12 +139,12 @@ export default function Analytics() {
             <FormBadge form={viewer.form} />
           </div>
           <div className="analytics-mini-grid">
-            <Mini label="Neto total"   value={fmtNet(viewer.totalNet)} pos={viewer.totalNet} />
-            <Mini label="Media/partida" value={fmtNet(viewer.avgNet)}  pos={viewer.avgNet} />
-            <Mini label="Win rate"     value={`${viewer.winRate}%`}    pos={viewer.winRate - 50} />
-            <Mini label="Volatilidad"  value={`€${viewer.volatility}`} neutral />
-            <Mini label="Mejor"        value={fmtNet(viewer.best)}     pos={viewer.best} />
-            <Mini label="Peor"         value={fmtNet(viewer.worst)}    pos={viewer.worst} />
+            <Mini label="Neto total"    value={fmtNet(viewer.totalNet)} pos={viewer.totalNet} />
+            <Mini label="Media/partida" value={fmtNet(viewer.avgNet)}   pos={viewer.avgNet} />
+            <Mini label="Win rate"      value={`${viewer.winRate}%`}    pos={viewer.winRate - 50} />
+            <Mini label="Volatilidad"   value={`€${viewer.volatility}`} neutral />
+            <Mini label="Mejor"         value={fmtNet(viewer.best)}     pos={viewer.best} />
+            <Mini label="Peor"          value={fmtNet(viewer.worst)}    pos={viewer.worst} />
           </div>
         </div>
       )}
@@ -187,66 +199,94 @@ export default function Analytics() {
       {/* ── Cumulative evolution ───────────────────────── */}
       {chartData.points.length > 1 && (
         <div className="mb-6">
-          <div className="section-label mb-3">Evolución del neto acumulado</div>
+          <div className="section-label mb-1">Evolución del dinero acumulado</div>
+          <p style={{ fontSize: '.74rem', color: 'var(--text-faint)', marginBottom: 'var(--s3)' }}>
+            {viewer
+              ? `Línea resaltada: ${viewer.name}. Cada punto es una partida jugada.`
+              : 'Elige un jugador arriba para resaltar su línea. Cada punto es una partida.'}
+          </p>
           <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={chartData.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="game" stroke="var(--text-faint)" tick={{ fontSize: 11, fill: 'var(--text-faint)' }} />
-                <YAxis stroke="var(--text-faint)" tick={{ fontSize: 11, fill: 'var(--text-faint)' }} tickFormatter={(v) => `€${v}`} width={48} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '.8rem' }}
-                  formatter={(v, name) => [`€${Number(v).toFixed(2)}`, name]}
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData.points} margin={{ top: 10, right: 16, bottom: 4, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis
+                  dataKey="game"
+                  stroke="var(--text-faint)"
+                  tick={{ fontSize: 11, fill: 'var(--text-faint)' }}
+                  tickLine={false}
+                  label={{ value: 'Partida nº', position: 'insideBottom', offset: -2, fill: 'var(--text-faint)', fontSize: 10 }}
                 />
-                <Legend wrapperStyle={{ fontSize: '.7rem' }} />
-                <ReferenceLine y={0} stroke="var(--text-faint)" strokeDasharray="4 4" />
-                {chartData.keys.map((k) => (
-                  <Line
-                    key={k.id}
-                    type="monotone"
-                    dataKey={k.name}
-                    stroke={colorById[k.id] || '#4ade80'}
-                    strokeWidth={viewerId === k.id ? 3 : 1.5}
-                    opacity={!viewerId || viewerId === k.id ? 1 : 0.35}
-                    dot={false}
-                    connectNulls
-                  />
-                ))}
+                <YAxis
+                  stroke="var(--text-faint)"
+                  tick={{ fontSize: 11, fill: 'var(--text-faint)' }}
+                  tickFormatter={(v) => `${v >= 0 ? '' : '−'}€${Math.abs(v)}`}
+                  tickLine={false}
+                  width={52}
+                />
+                <Tooltip content={<CumulativeTooltip viewerName={viewer?.name} colorByName={chartData.colorByName} />} />
+                <ReferenceLine y={0} stroke="var(--text-muted)" strokeWidth={1} />
+                {chartData.keys.map((k) => {
+                  const focused = !viewerId || viewer?.name === k.name
+                  return (
+                    <Line
+                      key={k.id}
+                      type="monotone"
+                      dataKey={k.name}
+                      stroke={chartData.colorByName[k.name] || '#4ade80'}
+                      strokeWidth={viewer?.name === k.name ? 3.5 : 2}
+                      opacity={focused ? 1 : 0.18}
+                      dot={viewer?.name === k.name ? { r: 3, strokeWidth: 0 } : false}
+                      activeDot={focused ? { r: 5, strokeWidth: 0 } : false}
+                      connectNulls
+                      isAnimationActive={false}
+                    />
+                  )
+                })}
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {/* ── Head-to-head for viewer ────────────────────── */}
-      {viewer && h2h.length > 0 && (
-        <div className="mb-6">
-          <div className="section-label mb-3">
-            <Swords size={14} style={{ verticalAlign: -2, marginRight: 6 }} />
-            {viewer.name} cara a cara
-          </div>
-          {h2h.map((r) => (
-            <div key={r.id} className="h2h-row">
-              <div className="avatar avatar-sm" style={{ background: r.avatarColor }}>
-                {r.name.slice(0, 2).toUpperCase()}
-              </div>
-              <span style={{ flex: 1, fontWeight: 600 }}>{r.name}</span>
-              <span style={{ fontSize: '.75rem', color: 'var(--text-faint)' }}>
-                {r.aheadCount}/{r.games} por delante
-              </span>
-              <span style={{
-                fontWeight: 700, minWidth: 70, textAlign: 'right',
-                color: r.netDiff > 0.01 ? 'var(--green)' : r.netDiff < -0.01 ? 'var(--red)' : 'var(--neutral)',
-              }}>
-                {fmtNet(r.netDiff)}
-              </span>
-            </div>
-          ))}
-          <p style={{ fontSize: '.72rem', color: 'var(--text-faint)', marginTop: 'var(--s2)' }}>
-            Diferencia de neto acumulada en las partidas que jugasteis juntos. Verde = le ganas dinero.
-          </p>
+      {/* ── Player comparator ──────────────────────────── */}
+      <div className="mb-6">
+        <div className="section-label mb-2">
+          <BarChart2 size={14} style={{ verticalAlign: -2, marginRight: 6 }} />
+          Comparador de jugadores
         </div>
-      )}
+        <select className="input mb-3" value={metric} onChange={(e) => setMetric(e.target.value)}>
+          {METRICS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+        </select>
+        <div className="chart-wrapper" style={{ padding: 'var(--s4) var(--s3) var(--s4) 0' }}>
+          <ResponsiveContainer width="100%" height={comparatorHeight}>
+            <BarChart data={comparatorData} layout="vertical" margin={{ top: 0, right: 56, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={88}
+                tick={{ fontSize: 12, fill: 'var(--text-2)' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(255,255,255,.04)' }}
+                content={<ComparatorTooltip metricDef={metricDef} />}
+              />
+              <ReferenceLine x={0} stroke="var(--text-muted)" />
+              <Bar dataKey="value" radius={[0, 6, 6, 0]} label={<BarLabel metricDef={metricDef} />}>
+                {comparatorData.map((d) => {
+                  const color = metricDef.signed
+                    ? (d.value > 0.01 ? 'var(--green-dim)' : d.value < -0.01 ? 'var(--red)' : 'var(--neutral)')
+                    : d.color
+                  return <Cell key={d.id} fill={color} />
+                })}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       {/* ── Consistency ranking ────────────────────────── */}
       {mostConsistent.length > 1 && (
@@ -259,9 +299,7 @@ export default function Analytics() {
                 {p.name.slice(0, 2).toUpperCase()}
               </div>
               <span style={{ flex: 1, fontWeight: 600 }}>{p.name}</span>
-              <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}>
-                ±€{p.volatility}
-              </span>
+              <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}>±€{p.volatility}</span>
             </div>
           ))}
           <p style={{ fontSize: '.72rem', color: 'var(--text-faint)', marginTop: 'var(--s2)' }}>
@@ -305,29 +343,70 @@ function Mini({ label, value, pos, neutral }) {
   )
 }
 
+// Tooltip for the cumulative chart — lists every player at that game, sorted
+function CumulativeTooltip({ active, payload, label, viewerName, colorByName }) {
+  if (!active || !payload?.length) return null
+  const rows = payload
+    .filter((p) => p.value != null)
+    .sort((a, b) => b.value - a.value)
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: '.8rem', maxWidth: 220 }}>
+      <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Partida {label}</div>
+      {rows.map((r) => (
+        <div key={r.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: r.name === viewerName ? 800 : 500 }}>
+          <span style={{ color: colorByName[r.name] || 'var(--text)' }}>{r.name}</span>
+          <span style={{ fontVariantNumeric: 'tabular-nums', color: r.value >= 0 ? 'var(--green)' : 'var(--red)' }}>
+            {r.value >= 0 ? '+' : '−'}€{Math.abs(r.value).toFixed(2)}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ComparatorTooltip({ active, payload, metricDef }) {
+  if (!active || !payload?.length) return null
+  const d = payload[0].payload
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: '.85rem' }}>
+      <div style={{ fontWeight: 700, marginBottom: 2 }}>{d.name}</div>
+      <div style={{ color: 'var(--text-muted)' }}>{metricDef.fmt(d.value)}</div>
+    </div>
+  )
+}
+
+// Value label drawn at the end of each comparator bar
+function BarLabel({ x, y, width, height, value, metricDef }) {
+  if (value == null) return null
+  const txt = metricDef.fmt(value)
+  return (
+    <text x={x + width + 6} y={y + height / 2} dy={4} fill="var(--text-2)" fontSize={11} fontWeight={700}>
+      {txt}
+    </text>
+  )
+}
+
 /**
  * Build aligned multi-series cumulative data: x = game index over time,
  * each player's running cumulative net carried forward.
  */
 function buildCumulativeSeries(games) {
   const ordered = [...(games || [])].sort((a, b) => new Date(a.played_at) - new Date(b.played_at))
-  const cum = {}        // playerId -> running total
-  const names = {}      // playerId -> name
+  const cum = {}, names = {}, colors = {}
   const points = []
 
   ordered.forEach((game, idx) => {
     for (const gp of game.game_players || []) {
       if (!gp.player) continue
       names[gp.player.id] = gp.player.name
+      colors[gp.player.name] = gp.player.avatar_color
       cum[gp.player.id] = Math.round(((cum[gp.player.id] || 0) + parseFloat(gp.net)) * 100) / 100
     }
     const point = { game: idx + 1 }
-    for (const pid of Object.keys(names)) {
-      point[names[pid]] = cum[pid] ?? null
-    }
+    for (const pid of Object.keys(names)) point[names[pid]] = cum[pid] ?? null
     points.push(point)
   })
 
   const keys = Object.keys(names).map((id) => ({ id, name: names[id] }))
-  return { points, keys }
+  return { points, keys, colorByName: colors }
 }

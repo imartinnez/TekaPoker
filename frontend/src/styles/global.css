@@ -1229,6 +1229,21 @@ button, input, select, textarea { font-family: inherit; }
   text-align: right;
 }
 
+.chip-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+}
+.chip-summary-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s2);
+  text-align: center;
+}
+.chip-summary-val { font-size: 1.15rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.chip-summary-label { font-size: .62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
 /* ── Analytics page ──────────────────────────────────────── */
 .analytics-mini-grid {
   display: grid;
